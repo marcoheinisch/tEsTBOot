@@ -1,11 +1,13 @@
 # Discord python bot for Konziis!
 # 
-# Quellen:
-# https://realpython.com/how-to-make-a-discord-bot-python/
-# https://discordpy.readthedocs.io/en/latest/index.html
+# Intresting:
+#   https://realpython.com/how-to-make-a-discord-bot-python/
+#   https://discordpy.readthedocs.io/en/latest/index.html
+#   https://github.com/Rapptz/discord.py/tree/v1.7.2/examples
 
 import os
 import random
+import asyncio
 
 import discord 
 from discord.ext import commands
@@ -14,10 +16,28 @@ import requests
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
 
 bot = commands.Bot(command_prefix='!')
 
+TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk", 
+                    "is lonely and want's to talk", 
+                    "is waiting for you ",
+                    "is sitting alone here",
+                    "<put here some random text stuff>"
+                    ]
+
 # Events
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+    if before.channel is None and after.channel is not None:
+        print("lonely state")
+        await asyncio.sleep(10) # wait to est if user is shy
+        if after.channel is not None:
+            guild = discord.utils.get(bot.guilds, name=GUILD)
+            text_channel = discord.utils.get(guild.text_channels, name="📯mitteilungen")
+            await text_channel.send(f"Moin moin! {member.name} "+random.choice(TXT_VOICE_UPDATE)+". Visit him at #"+after.channel.name+".")
 
 @bot.event
 async def on_ready():
@@ -59,14 +79,6 @@ async def roll(ctx, txt:str):
     print("echo!")
     await ctx.send(txt)
 
-@bot.event
-async def on_voice_state_update(member, before, after):
-    if before.voice_channel is None and after.voice_channel is not None:
-        for channel in before.server.channels:
-            if channel.name == 'admin':
-                await bot.send_message(channel, "Howdy")
-        print(str(after))
-
 @bot.command(name='emoji', help='Creates custom server emoji.')
 async def roll(ctx, emoji_name: str, image_url:str):
     print("emoji!")
@@ -83,3 +95,11 @@ async def on_command_error(ctx, error):
 
 bot.run(TOKEN)
 
+
+# Custom event example:
+# 
+# bot.dispatch("custom_event", arg1, arg2)
+#
+# @bot.event
+# async def on_custom_event(arg1, arg2):
+#     print("Custom event")
