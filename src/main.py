@@ -32,12 +32,15 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
 @bot.event
 async def on_voice_state_update(member, before, after):
     if before.channel is None and after.channel is not None:
+        channel_name=after.channel.name
         print("lonely state")
-        await asyncio.sleep(10) # wait to est if user is shy
+        await asyncio.sleep(10) # wait to est if user is shy / has misclicked
         if after.channel is not None:
             guild = discord.utils.get(bot.guilds, name=GUILD)
-            text_channel = discord.utils.get(guild.text_channels, name="📯mitteilungen")
-            await text_channel.send(f"Moin moin! {member.name} "+random.choice(TXT_VOICE_UPDATE)+". Visit him at #"+after.channel.name+".")
+            voice_channel = discord.utils.get(guild.voice_channels, name=channel_name)
+            if len(voice_channel.voice_states)==1:
+                text_channel = discord.utils.get(guild.text_channels, name="📯mitteilungen")
+                await text_channel.send(f"Moin moin! {member.name} "+random.choice(TXT_VOICE_UPDATE)+". Visit him at #"+after.channel.name+".")
 
 @bot.event
 async def on_ready():
