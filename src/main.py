@@ -27,7 +27,7 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "<put here some random text stuff>"
                     ]
 
-activity = discord.Game(name="mit Feuer!🔥🔥🔥")#discord.Activity(type=discord.ActivityType.watching, name="you!")
+activity = discord.Game(name="in der Cloud! ☁☁☁")#discord.Activity(type=discord.ActivityType.watching, name="you!")
 bot = commands.Bot(command_prefix='!', activity=activity)#, status=discord.Status.dnd)
 
 # Events
