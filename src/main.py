@@ -97,6 +97,12 @@ async def roll(ctx, emoji_name: str, image_url:str):
     img = await ctx.guild.create_custom_emoji(name=emoji_name, image=img)
     await ctx.send(">> Emoji created: "+str(img))
 
+@bot.command(name='molec', help='Visualize a given molecule')
+async def roll(ctx, smile_string: str):
+    print('molec!')
+    url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string+ '/image'
+    await ctx.send(">> Molecule: "+ str(url1))
+
 @bot.event
 async def on_command_error(ctx, error):
     print(error.__cause__)
