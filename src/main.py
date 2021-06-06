@@ -19,7 +19,7 @@ import requests
 # load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
-MESSAGE_CHANNEL = "admin"
+MESSAGE_CHANNEL = "📯mitteilungen"
 TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk", 
                     #"is lonely and want's to talk", 
                     "is waiting for you ",
@@ -78,12 +78,13 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     print(dice)
     await ctx.send(', '.join(dice))
 
-@bot.command(name='hi', help='Say Hello!')
-async def roll(ctx, number_of_dice: int, number_of_sides: int):
+@bot.command(name='hi', help='Say \"Hi!\" multiple times.')
+async def roll(ctx, number_of_hi: int = 1):
     print("hi!")
-    await ctx.send('Hi!')
+    for _ in range(number_of_hi):
+        await ctx.send('Hi!')
 
-@bot.command(name='echo', help='Echos')
+@bot.command(name='echo', help='Echo string.')
 async def roll(ctx, txt:str):
     print("echo!")
     await ctx.send(txt)
@@ -99,7 +100,7 @@ async def roll(ctx, emoji_name: str, image_url:str):
 @bot.event
 async def on_command_error(ctx, error):
     print(error.__cause__)
-    await ctx.send(">> Error:"+str(error.__cause__))
+    await ctx.send(">> Error: "+str(error.__cause__))
     
 
 bot.run(TOKEN)
