@@ -26,8 +26,9 @@ from mcstatus import MinecraftServer
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-STATUS_CHECK_TIME = 10 * 60
-STATUS_SERVER_ADDRESS = "ratius99.aternos.me"
+MC_SERVER_CHECK_TIME = 10 * 60
+MC_SERVER_ADDRESS = "ratius99.aternos.me"
+MC_SERVER_STATUS_INT = 0
 
 MESSAGE_CHANNEL = "📯mitteilungen"
 TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk", 
@@ -46,28 +47,23 @@ bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activit
 async def check_mc_status():
     print("loopmc")
 
-    mc_status=""
+    mc_status = basic_activity_name
+    players = 0
     
     try:
-        server = MinecraftServer.lookup(STATUS_SERVER_ADDRESS)
+        server = MinecraftServer.lookup(MC_SERVER_ADDRESS)
         status = server.status()
-
-    # if no error happend:
-        if (not status.players.online):
-            mc_status = basic_activity_name
-        elif (1 == status.players.online):
-            mc_status = " mit einem Spieler MC!"
-        else:
-            mc_status = " mit {0} Spielern MC!".format(status.players.online)
-            
-    # if error hapend:
-    except socket.gaierror:
+        players = status.players.online
+    except ConnectionRefusedError:
         mc_status = " mit Errors ..."
     except Exception:
         mc_status = " mit \"bad status error\" :-("
-    
-    await bot.change_presence(activity = discord.Game(name=mc_status))
 
+    # if no error happend:
+    if (players):
+        mc_status = " mit"+("einem" if (players==1) else str(players))+" Spielern MC!"
+
+    await bot.change_presence(activity = discord.Game(name=mc_status))
 
 # Events
 
