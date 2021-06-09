@@ -12,27 +12,46 @@ import asyncio
 import discord
 from discord import activity 
 from discord.ext import commands
+from discord.ext import tasks
 import requests
+
+from mcstatus import MinecraftServer
+
 
 # DEBUG:
 # from dotenv import load_dotenv
 # load_dotenv()
+
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 MESSAGE_CHANNEL = "📯mitteilungen"
 TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk", 
-                    #"is lonely and want's to talk", 
+                    "is lonely and want's to talk", 
                     "is waiting for you ",
                     "is sitting alone here",
                     "<put here some random text stuff>"
                     ]
 
-activity = discord.Game(name="in der Cloud! ☁☁☁")#discord.Activity(type=discord.ActivityType.watching, name="you!")
-bot = commands.Bot(command_prefix='!', activity=activity)#, status=discord.Status.dnd)
+basic_activity = discord.Game(name="in der Cloud! ☁☁☁")
+bot = commands.Bot(command_prefix='!', activity=basic_activity)
+
+# Tasks
+
+@tasks.loop(minutes=5)
+async def test():
+    # If you know the host and port, you may skip this and use MinecraftServer("example.org", 1234)
+    server = MinecraftServer.lookup("ratius99.aternos.me")
+
+    # 'status' is supported by all Minecraft servers that are version 1.7 or higher.
+    status = server.status()
+    if status.players.online:
+        await bot.change_presence(activity = discord.CustomActivity(name="{0} mc players online ({1}ms))".format(status.players.online, status.latency)))
+    else:
+        await bot.change_presence(activity = basic_activity)
 
 # Events
 
-@bot.event
+@bot.event 
 async def on_voice_state_update(member, before, after):
     if before.channel is None and after.channel is not None:
         channel_name=after.channel.name
@@ -97,7 +116,7 @@ async def roll(ctx, emoji_name: str, image_url:str):
     img = await ctx.guild.create_custom_emoji(name=emoji_name, image=img)
     await ctx.send(">> Emoji created: "+str(img))
 
-@bot.command(name='molec', help='Visualize a given molecule')
+@bot.command(name='molec', help='Visualize a given molecule string.', brief='Visualize a given molecule string. Supports MIME and other structural identifier. Note: Triple bonds in SMILES strings represented by \'\#\' have to be URL-escaped as \'%23\' and \'?\' as \'%3F\'. ')
 async def roll(ctx, smile_string: str):
     print('molec!')
     url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string+ '/image'
