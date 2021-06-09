@@ -8,6 +8,7 @@
 import os
 import random
 import asyncio
+from socket import socket
 
 import discord
 from discord import activity 
@@ -25,6 +26,11 @@ from mcstatus import MinecraftServer
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+
+STATUS_CHECK_TIME = 10 * 60
+STATUS_SERVER_ADDRESS = "ratius99.aternos.me"
+
+
 MESSAGE_CHANNEL = "📯mitteilungen"
 TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk", 
                     "is lonely and want's to talk", 
@@ -33,32 +39,35 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "<put here some random text stuff>"
                     ]
 
-basic_activity = discord.Game(name="in der Cloud! ☁☁☁")
-bot = commands.Bot(command_prefix='!', activity=basic_activity)
+basic_activity_name ="Spielt in der Cloud! ☁☁☁"
+bot = commands.Bot(command_prefix='!', activity= discord.CustomActivity(name=basic_activity_name))
 
 # Tasks
 
 @tasks.loop(minutes=10)
-async def test():
+async def check_mc_status():
     print("loopmc")
-    # If you know the host and port, you may skip this and use MinecraftServer("example.org", 1234)
-    server = MinecraftServer.lookup("ratius99.aternos.me")
 
-    # 'status' is supported by all Minecraft servers that are version 1.7 or higher.
-    mc_status=None
+    mc_status=""
+    
     try:
+        server = MinecraftServer.lookup(STATUS_SERVER_ADDRESS)
         status = server.status()
-        mc_status = "{0} mc players online ({1}ms))".format(status.players.online, status.latency)
+
+    # if no error happend:
+        if (status.players.online):
+            mc_status = "{0} MC players online".format(status.players.online)
+        else:
+            mc_status = basic_activity_name
+
+    # if error hapend:
+    except socket.gaierror:
+        mc_status = "Handle some errors..."
     except Exception:
-        print("loopmc ex")
+        mc_status = "Bad status error :-("
+    
+    await bot.change_presence(activity = discord.CustomActivity(name=mc_status))
 
-
-    if status.players.online:
-        print("loopmc o")
-        await bot.change_presence(activity = discord.CustomActivity(name=mc_status))
-    else:
-        print("loopmc n o")
-        await bot.change_presence(activity = basic_activity)
 
 # Events
 
@@ -138,6 +147,7 @@ async def on_command_error(ctx, error):
     print(error.__cause__)
     await ctx.send(">> Error: "+str(error.__cause__))
     
+check_mc_status.start()
 
 bot.run(TOKEN)
 
