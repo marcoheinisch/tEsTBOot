@@ -40,7 +40,7 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     ]
 
 basic_activity_name =" in der Cloud! ☁☁☁"
-bot = commands.Bot(command_prefix='!', activity= discord.Game(name=basic_activity_name))
+bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activity_name))
 
 # Tasks
 
@@ -90,6 +90,7 @@ async def on_voice_state_update(member, before, after):
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+    check_mc_status.start()
 
 @bot.event
 async def on_member_join(member):
@@ -147,7 +148,7 @@ async def on_command_error(ctx, error):
     print(error.__cause__)
     await ctx.send(">> Error: "+str(error.__cause__))
     
-check_mc_status.start()
+
 
 bot.run(TOKEN)
 
