@@ -19,7 +19,6 @@ import requests
 
 from mcstatus import MinecraftServer
 
-
 # DEBUG:
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -30,7 +29,6 @@ GUILD = os.getenv('DISCORD_GUILD')
 STATUS_CHECK_TIME = 10 * 60
 STATUS_SERVER_ADDRESS = "ratius99.aternos.me"
 
-
 MESSAGE_CHANNEL = "📯mitteilungen"
 TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk", 
                     "is lonely and want's to talk", 
@@ -39,7 +37,7 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "<put here some random text stuff>"
                     ]
 
-basic_activity_name =" in der Cloud! ☁☁☁"
+basic_activity_name =" in der Cloud! ☁"
 bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activity_name))
 
 # Tasks
@@ -55,11 +53,13 @@ async def check_mc_status():
         status = server.status()
 
     # if no error happend:
-        if (status.players.online):
-            mc_status = " mit {0} Spielern MC!".format(status.players.online)
-        else:
+        if (not status.players.online):
             mc_status = basic_activity_name
-
+        elif (1 == status.players.online):
+            mc_status = " mit einem Spieler MC!"
+        else:
+            mc_status = " mit {0} Spielern MC!".format(status.players.online)
+            
     # if error hapend:
     except socket.gaierror:
         mc_status = " mit Errors ..."
