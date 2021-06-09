@@ -39,8 +39,8 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "<put here some random text stuff>"
                     ]
 
-basic_activity_name ="Spielt in der Cloud! ☁☁☁"
-bot = commands.Bot(command_prefix='!', activity= discord.CustomActivity(name=basic_activity_name))
+basic_activity_name =" in der Cloud! ☁☁☁"
+bot = commands.Bot(command_prefix='!', activity= discord.Game(name=basic_activity_name))
 
 # Tasks
 
@@ -56,17 +56,17 @@ async def check_mc_status():
 
     # if no error happend:
         if (status.players.online):
-            mc_status = "{0} MC players online".format(status.players.online)
+            mc_status = " mit {0} Spielern MC!".format(status.players.online)
         else:
             mc_status = basic_activity_name
 
     # if error hapend:
     except socket.gaierror:
-        mc_status = "Handle some errors..."
+        mc_status = " mit Errors ..."
     except Exception:
-        mc_status = "Bad status error :-("
+        mc_status = " mit \"bad status error\" :-("
     
-    await bot.change_presence(activity = discord.CustomActivity(name=mc_status))
+    await bot.change_presence(activity = discord.Game(name=mc_status))
 
 
 # Events
