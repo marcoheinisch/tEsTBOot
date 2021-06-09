@@ -61,7 +61,7 @@ async def check_mc_status():
 
     # if no error happend:
     if (players):
-        mc_status = " mit"+("einem" if (players==1) else str(players))+" Spielern MC!"
+        mc_status = " mit "+("einem Spieler" if (players==1) else str(players)+" Spielern")+" MC!"
 
     await bot.change_presence(activity = discord.Game(name=mc_status))
 
