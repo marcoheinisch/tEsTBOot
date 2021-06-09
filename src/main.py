@@ -13,6 +13,7 @@ import discord
 from discord import activity 
 from discord.ext import commands
 from discord.ext import tasks
+from dns.rcode import NOERROR
 import requests
 
 from mcstatus import MinecraftServer
@@ -37,16 +38,26 @@ bot = commands.Bot(command_prefix='!', activity=basic_activity)
 
 # Tasks
 
-@tasks.loop(minutes=5)
+@tasks.loop(minutes=10)
 async def test():
+    print("loopmc")
     # If you know the host and port, you may skip this and use MinecraftServer("example.org", 1234)
     server = MinecraftServer.lookup("ratius99.aternos.me")
 
     # 'status' is supported by all Minecraft servers that are version 1.7 or higher.
-    status = server.status()
+    mc_status=None
+    try:
+        status = server.status()
+        mc_status = "{0} mc players online ({1}ms))".format(status.players.online, status.latency)
+    except Exception:
+        print("loopmc ex")
+
+
     if status.players.online:
-        await bot.change_presence(activity = discord.CustomActivity(name="{0} mc players online ({1}ms))".format(status.players.online, status.latency)))
+        print("loopmc o")
+        await bot.change_presence(activity = discord.CustomActivity(name=mc_status))
     else:
+        print("loopmc n o")
         await bot.change_presence(activity = basic_activity)
 
 # Events
