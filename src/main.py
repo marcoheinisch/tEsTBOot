@@ -133,7 +133,7 @@ async def roll(ctx, emoji_name: str, image_url:str):
     img = await ctx.guild.create_custom_emoji(name=emoji_name, image=img)
     await ctx.send(">> Emoji created: "+str(img))
 
-@bot.command(name='molec', help='Visualize a given molecule string.', brief='Visualize a given molecule string. Supports MIME and other structural identifier. Note: Triple bonds in SMILES strings represented by \'\#\' have to be URL-escaped as \'%23\' and \'?\' as \'%3F\'. ')
+@bot.command(name='molec', help='Visualize a given molecule string. Supports MIME and other structural identifier. Note: Triple bonds in SMILES strings represented by \'\#\' have to be URL-escaped as \'%23\' and \'?\' as \'%3F\'. ', brief='Visualize a given molecule string.')
 async def roll(ctx, smile_string: str):
     print('molec!')
     url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string+ '/image'
