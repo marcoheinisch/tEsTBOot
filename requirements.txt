@@ -3,3 +3,4 @@ discord
 requests
 mcstatus
 wolframalpha
+nested-lookup

@@ -18,7 +18,9 @@ from discord import activity
 from discord.ext import commands
 from discord.ext import tasks
 from dns.rcode import NOERROR
+
 import requests
+from nested_lookup import nested
 
 from mcstatus import MinecraftServer
 import wolframalpha
@@ -45,27 +47,6 @@ basic_activity_name =" in der Cloud! ☁"
 bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activity_name))
 
 wolframclient = wolframalpha.Client(WOLFRAM_APPID)
-
-# Helper
-
-def json_extract(obj, key):
-    """Recursively fetch values from nested JSON."""
-    arr = []
-
-    def extract(obj, arr, key):
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if isinstance(v, (dict, list)):
-                    extract(v, arr, key)
-                elif k == key:
-                    arr.append(v)
-        elif isinstance(obj, list):
-            for item in obj:
-                extract(item, arr, key)
-        return arr
-
-    values = extract(obj, arr, key)
-    return values
 
 # Initialization errors
 
@@ -191,14 +172,16 @@ async def roll(ctx, *, question_string: str):
     res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
+        return
     
-    subpods = json_extract(res, "subpod")
+    subpods = nested.nested_lookup("subpod", res)
     if len(subpods) == 0:
         await ctx.send(">> Wolfram: No Images found.")
+        return
 
-    message = " "
+    message = ""
     for subpod in subpods:
-        message += " " + subpod.img.src
+        message += subpod.img.title + ": " + subpod.img.src + "\n"
 
     await ctx.send(">> Wolfram: "+ message)
 
