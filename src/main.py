@@ -181,6 +181,8 @@ async def roll(ctx, *, question_string: str):
 
     message = ""    
     for pod in res.pods:
+        if pod.title == "Plot":
+            message += str(sub.img.src) + "\n"
         for sub in pod.subpods:
             message += str(sub.plaintext) + "\n"
     await ctx.send(">> Wolfram: "+ message)
