@@ -2,3 +2,4 @@ discord
 #dotenv>=0.17.0
 requests
 mcstatus
+wolframalpha

@@ -1,9 +1,12 @@
 # Discord python bot for Konziis!
 # 
-# Intresting:
+# Python discord bot:
 #   https://realpython.com/how-to-make-a-discord-bot-python/
 #   https://discordpy.readthedocs.io/en/latest/index.html
 #   https://github.com/Rapptz/discord.py/tree/v1.7.2/examples
+# 
+# Wolfram-API:
+#   https://products.wolframalpha.com/api/documentation/#getting-started
 
 import os
 import random
@@ -18,13 +21,13 @@ from dns.rcode import NOERROR
 import requests
 
 from mcstatus import MinecraftServer
+import wolframalpha
 
 # DEBUG:
-# from dotenv import load_dotenv
-# load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+WOLFRAM_APPID = os.getenv('WOLFRAM_APPID')
 
 MC_SERVER_CHECK_TIME = 10 * 60
 MC_SERVER_ADDRESS = "ratius99.aternos.me"
@@ -40,6 +43,13 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
 
 basic_activity_name =" in der Cloud! ☁"
 bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activity_name))
+
+wolframclient = wolframalpha.Client(WOLFRAM_APPID)
+
+# Initialization errors
+
+if not (TOKEN and GUILD and WOLFRAM_APPID):
+    raise RuntimeError("Missing environmental variable.")
 
 # Tasks
 
@@ -144,6 +154,47 @@ async def on_command_error(ctx, error):
     print(error.__cause__)
     await ctx.send(">> Error: "+str(error.__cause__))
     
+@bot.command(name='wolfram', help='Use wolfram-api. It can do everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)', brief='Use Wolfram Alpha to solve Math or ask random stuff.')
+async def roll(ctx, question_string: str):
+    print('wolfram!')
+    res = await wolframclient.query(question_string)
+    if not res.success:
+        await ctx.send(">> Wolfram Error: ")
+    await ctx.send(">> Wolfram: "+ str(next(res.results).text))
+
+@bot.command(name='wolfram-img', help='See !wolfram. Returns only images, plot and co. (Overview: https://www.wolframalpha.com/)', brief='See !wolfram. Returns only images, plots and co.')
+async def roll(ctx, question_string: str):
+    def json_extract(obj, key):
+        """Recursively fetch values from nested JSON."""
+        arr = []
+
+        def extract(obj, arr, key):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if isinstance(v, (dict, list)):
+                        extract(v, arr, key)
+                    elif k == key:
+                        arr.append(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    extract(item, arr, key)
+            return arr
+
+        values = extract(obj, arr, key)
+        return values
+
+    print('wolfram-img!')
+    res = await wolframclient.query(question_string)
+    if not res.success:
+        await ctx.send(">> Wolfram Weisnisch Weiter... ")
+    
+    imgs = json_extract(res, "img")
+    if not imgs:
+        await ctx.send(">> Wolfram: No Images found.")
+
+    for img in imgs:
+        await ctx.send(">> Wolfram: "+ str(img.src))
+    #await ctx.send(">> Wolfram: "+ str(next(res.results).text))
 
 
 bot.run(TOKEN)
