@@ -121,8 +121,3 @@ class Commands(commands.Cog):
                 message += str(pod.subpod.img.src) + "\n"
         await ctx.send(">> Wolfram: "+ message)
 
-
-    @commands.event
-    async def on_command_error(self, ctx: commands.Context, error):
-        print(error.__cause__)
-        await ctx.send(">> Error: "+str(error.__cause__))

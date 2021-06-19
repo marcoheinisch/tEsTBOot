@@ -110,6 +110,11 @@ async def on_message(message):
     # here read messageses   
     await bot.process_commands(message)
 
+@bot.event
+async def on_command_error(ctx: commands.Context, error):
+    print(error.__cause__)
+    await ctx.send(">> Error: "+str(error.__cause__))
+
 bot.add_cog(Commands(bot, wolframclient))
 
 bot.run(TOKEN)
