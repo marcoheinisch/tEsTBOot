@@ -161,15 +161,11 @@ async def roll(ctx, *, question_string: str):
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
         return
-    
-    subpods = nested_lookup("subpod", res)
-    if len(subpods) == 0:
-        await ctx.send(">> Wolfram: No subpods found.")
-        return
 
-    message = ""
-    for subpod in subpods:
-        message += subpod.img.title + "\n\n"
+    message = ""    
+    for pod in res.pods:
+        for sub in pod.subpods:
+            message += sub.plaintext + "\n"
 
     await ctx.send(">> Wolfram: "+ message)
 
