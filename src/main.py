@@ -175,26 +175,32 @@ async def roll(ctx, *, question_string: str):
     print('wolfram! '+ question_string)
     res = wolframclient.query(question_string)
     if not res.success:
-        await ctx.send(">> Wolfram Error: ")
-    await ctx.send(">> Wolfram: "+ str(next(res.results).text))
+        await ctx.send(">> Wolfram Weisnisch Weiter... ")
+
+    #pods = res.pod
+    #if len(res_objects) == 0:
+    #    await ctx.send(">> Wolfram: No Images found.")
+    #await ctx.send(">> Wolfram: "+ str(next(res.results).text))
 
 @bot.command(name='wolfram-img')
 async def roll(ctx, *, question_string: str):
     """First. Second. Long... ......... ............. ........ ........
     newline ...... ....... .......... ......"""
 
-    print('wolfram-img! '+question_string)
+    print('wolfram-img! ' + question_string)
     res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
     
-    imgs = json_extract(res, "img")
-    if len(imgs) == 0:
+    subpods = json_extract(res, "subpod")
+    if len(subpods) == 0:
         await ctx.send(">> Wolfram: No Images found.")
 
-    for img in imgs:
-        await ctx.send(">> Wolfram: "+ str(img.src))
-    #await ctx.send(">> Wolfram: "+ str(next(res.results).text))
+    message = " "
+    for subpod in subpods:
+        message += " " + subpod.img.src
+
+    await ctx.send(">> Wolfram: "+ message)
 
 @bot.event
 async def on_command_error(ctx, error):
