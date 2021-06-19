@@ -14,7 +14,8 @@ import asyncio
 from socket import socket
 
 import discord
-from discord import activity 
+from discord import activity
+from discord.embeds import Embed 
 from discord.ext import commands
 from discord.ext import tasks
 from dns.rcode import NOERROR
@@ -151,23 +152,71 @@ async def roll(ctx, smile_string: str):
     url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string+ '/image'
     await ctx.send(">> Molecule: "+ str(url1))
     
-@bot.command(name='wolfram')#, help='Use wolfram-api. It can do everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)', brief='Use Wolfram Alpha to solve Math or ask random stuff.')
+@bot.command(name='wolfram')
 async def roll(ctx, *, question_string: str):
-    """First. Second. Long... ......... ............. ........ ........
-    newline ...... ....... .......... ......"""
-
+    """Use Wolfram Alpha (API) to solve Math or ask random stuff It can do ...
+    everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)"""
     print('wolfram! ' + question_string)
+
     res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
         return
 
+    message = next(res.results).text
+    await ctx.send(">> Wolfram: "+ message)
+
+@bot.command(name='wolfram-l')
+async def roll(ctx, *, question_string: str):
+    """Use Wolfram Alpha (API) to solve Math or ask random stuff It can do ...
+    everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)"""
+    print('wolfram! ' + question_string)
+
+    res = wolframclient.query(question_string)
+    if not res.success:
+        await ctx.send(">> Wolfram Weisnisch Weiter... ")
+        return
     message = ""    
     for pod in res.pods:
         for sub in pod.subpods:
             message += sub.plaintext + "\n"
-
     await ctx.send(">> Wolfram: "+ message)
+
+@bot.command(name='wolfram-t')
+async def roll(ctx, *, question_string: str):
+    em = Embed("""
+    <imagemap>
+       <rect left='12' top='8' right='39' bottom='28'
+         query='France+full+name'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.FullName-'
+         title='France full name' />
+       <rect left='39' top='8' right='76' bottom='28'
+         query='France+full+name'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.FullName-'
+         title='France full name' />
+       <rect left='12' top='42' right='39' bottom='62'
+         query='France+full+native+name'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.FullNativeNames-'
+         title='France full native name' />
+       <rect left='39' top='42' right='83' bottom='62'
+         query='France+full+native+name'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.FullNativeNames-'
+         title='France full native name' />
+       <rect left='83' top='42' right='120' bottom='62'
+         query='France+full+native+name'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.FullNativeNames-'
+         title='France full native name' />
+       <rect left='12' top='76' right='68' bottom='96'
+         query='France+internet+code'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.InternetCode-'
+         title='France internet code' />
+       <rect left='68' top='76' right='98' bottom='96'
+         query='France+internet+code'
+         assumptions='ClashPrefs_*Country.France.CountryProperty.InternetCode-'
+         title='France internet code' />
+     </imagemap>""")
+    await ctx.send(em)
+
 
 @bot.event
 async def on_command_error(ctx, error):
