@@ -184,7 +184,7 @@ async def roll(ctx, question_string: str):
         return values
 
     print('wolfram-img!')
-    res = await wolframclient.query(question_string)
+    res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
     
