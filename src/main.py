@@ -151,24 +151,12 @@ async def roll(ctx, smile_string: str):
     url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string+ '/image'
     await ctx.send(">> Molecule: "+ str(url1))
     
-@bot.command(name='wolfram', help='Use wolfram-api. It can do everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)', brief='Use Wolfram Alpha to solve Math or ask random stuff.')
-async def roll(ctx, *, question_string: str):
-    print('wolfram! '+ question_string)
-    res = wolframclient.query(question_string)
-    if not res.success:
-        await ctx.send(">> Wolfram Weisnisch Weiter... ")
-
-    #pods = res.pod
-    #if len(res_objects) == 0:
-    #    await ctx.send(">> Wolfram: No Images found.")
-    #await ctx.send(">> Wolfram: "+ str(next(res.results).text))
-
-@bot.command(name='wolfram-img')
+@bot.command(name='wolfram')#, help='Use wolfram-api. It can do everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)', brief='Use Wolfram Alpha to solve Math or ask random stuff.')
 async def roll(ctx, *, question_string: str):
     """First. Second. Long... ......... ............. ........ ........
     newline ...... ....... .......... ......"""
 
-    print('wolfram-img! ' + question_string)
+    print('wolfram! ' + question_string)
     res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
@@ -176,12 +164,12 @@ async def roll(ctx, *, question_string: str):
     
     subpods = nested_lookup("subpod", res)
     if len(subpods) == 0:
-        await ctx.send(">> Wolfram: No Images found.")
+        await ctx.send(">> Wolfram: No subpods found.")
         return
 
     message = ""
     for subpod in subpods:
-        message += subpod.img.title + ": " + subpod.img.src + "\n"
+        message += subpod.img.title + "\n\n"
 
     await ctx.send(">> Wolfram: "+ message)
 
