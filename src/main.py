@@ -170,8 +170,7 @@ async def roll(ctx, *, question_string: str):
 
 @bot.command(name='wolfram-l')
 async def roll(ctx, *, question_string: str):
-    """Use Wolfram Alpha (API) to solve Math or ask random stuff It can do ...
-    everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)"""
+    """Use Wolfram Alpha (API) and return long answer.  (Overview: https://www.wolframalpha.com/)"""
     print('wolfram! ' + question_string)
 
     res = wolframclient.query(question_string)
@@ -181,14 +180,31 @@ async def roll(ctx, *, question_string: str):
 
     message = ""    
     for pod in res.pods:
-        if pod.title == "Plot":
+        if pod.title == res.datatypes:
             message += str(pod.subpod.img.src) + "\n"
         for sub in pod.subpods:
-            message += str(sub.plaintext) + "\n"
+            if sub.plaintext:
+                message += str(sub.plaintext) + "\n"
     await ctx.send(">> Wolfram: "+ message)
 
+@bot.command(name='wolfram-get')
+async def roll(ctx, image_title: str, question_string: str):
+    """Get img.  (Overview: https://www.wolframalpha.com/)"""
+    print('wolfram! ' + question_string)
 
+    res = wolframclient.query(question_string)
+    if not res.success:
+        await ctx.send(">> Wolfram Weisnisch Weiter... ")
+        return
 
+    message = ""    
+    for pod in res.pods:
+        if pod.title == image_title:
+            message += str(pod.subpod.img.src) + "\n"
+        for sub in pod.subpods:
+            if sub.plaintext:
+                message += str(sub.plaintext) + "\n"
+    await ctx.send(">> Wolfram: "+ message)
 
 @bot.event
 async def on_command_error(ctx, error):
