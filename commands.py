@@ -13,7 +13,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='roll_dice')
-    async def roll(self, ctx: commands.Context, number_of_dice: int, number_of_sides: int):
+    async def roll_dice(self, ctx: commands.Context, number_of_dice: int, number_of_sides: int):
         """Simulates rolling dice."""
         print("roll event!")
 
@@ -26,7 +26,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='hi')
-    async def roll(self, ctx: commands.Context, number_of_hi: int = 1):
+    async def hi(self, ctx: commands.Context, number_of_hi: int = 1):
         """Say \"Hi!\" multiple times."""
         print("hi!")
 
@@ -35,7 +35,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='echo', help='Echo string.')
-    async def roll(self, ctx: commands.Context, *, txt:str):
+    async def echo(self, ctx: commands.Context, *, txt:str):
         """Echos input string."""
         print("echo!")
 
@@ -43,7 +43,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='emoji')
-    async def roll(self, ctx: commands.Context, emoji_name: str, image_url:str):
+    async def emoji(self, ctx: commands.Context, emoji_name: str, image_url:str):
         """Creates custom server emoji. 
         Supports .jpg .gif .png."""
         print("emoji!")
@@ -55,7 +55,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='molec')
-    async def roll(self, ctx: commands.Context, smile_string: str):
+    async def molec(self, ctx: commands.Context, smile_string: str):
         """'Visualize a given molecule string. Supports MIME and other structural identifier. 
         Note: Triple bonds in SMILES strings represented by \'\#\' have to be URL-escaped as \'%23\' and \'?\' as \'%3F\'."""
         print('molec!')
@@ -65,7 +65,7 @@ class Commands(commands.Cog):
         
 
     @commands.command(name='wolfram')
-    async def roll(self, ctx: commands.Context, *, question_string: str):
+    async def wolfram(self, ctx: commands.Context, *, question_string: str):
         """Use Wolfram Alpha (API) to solve Math or ask random stuff It can do ...
         everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)"""
         print('wolfram! ' + question_string)
@@ -82,7 +82,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='wolfall')
-    async def roll(self, ctx: commands.Context, *, question_string: str):
+    async def wolfall(self, ctx: commands.Context, *, question_string: str):
         """See !wolfram. Returns long informative answer"""
         print('wolfram! ' + question_string)
 
@@ -102,7 +102,7 @@ class Commands(commands.Cog):
 
 
     @commands.command(name='wolfget')
-    async def roll(self, ctx: commands.Context, image_title: str, question_string: str):
+    async def wolfget(self, ctx: commands.Context, image_title: str, question_string: str):
         """See !wolfram. Returns image with given title"""
         print('wolfram! ' + question_string)
 
