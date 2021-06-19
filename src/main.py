@@ -46,6 +46,27 @@ bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activit
 
 wolframclient = wolframalpha.Client(WOLFRAM_APPID)
 
+# Helper
+
+def json_extract(obj, key):
+    """Recursively fetch values from nested JSON."""
+    arr = []
+
+    def extract(obj, arr, key):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if isinstance(v, (dict, list)):
+                    extract(v, arr, key)
+                elif k == key:
+                    arr.append(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                extract(item, arr, key)
+        return arr
+
+    values = extract(obj, arr, key)
+    return values
+
 # Initialization errors
 
 if not (TOKEN and GUILD and WOLFRAM_APPID):
@@ -131,7 +152,7 @@ async def roll(ctx, number_of_hi: int = 1):
         await ctx.send('Hi!')
 
 @bot.command(name='echo', help='Echo string.')
-async def roll(ctx, txt:str):
+async def roll(ctx, *, txt:str):
     print("echo!")
     await ctx.send(txt)
 
@@ -148,54 +169,37 @@ async def roll(ctx, smile_string: str):
     print('molec!')
     url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string+ '/image'
     await ctx.send(">> Molecule: "+ str(url1))
-
-@bot.event
-async def on_command_error(ctx, error):
-    print(error.__cause__)
-    await ctx.send(">> Error: "+str(error.__cause__))
     
 @bot.command(name='wolfram', help='Use wolfram-api. It can do everything WolframAlpha can do: Equations, Weather  (Overview: https://www.wolframalpha.com/)', brief='Use Wolfram Alpha to solve Math or ask random stuff.')
-async def roll(ctx, question_string: str):
-    print('wolfram!')
-    res = await wolframclient.query(question_string)
+async def roll(ctx, *, question_string: str):
+    print('wolfram! '+ question_string)
+    res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Error: ")
     await ctx.send(">> Wolfram: "+ str(next(res.results).text))
 
-@bot.command(name='wolfram-img', help='See !wolfram. Returns only images, plot and co. (Overview: https://www.wolframalpha.com/)', brief='See !wolfram. Returns only images, plots and co.')
-async def roll(ctx, question_string: str):
-    def json_extract(obj, key):
-        """Recursively fetch values from nested JSON."""
-        arr = []
+@bot.command(name='wolfram-img')
+async def roll(ctx, *, question_string: str):
+    """First. Second. Long... ......... ............. ........ ........
+    newline ...... ....... .......... ......"""
 
-        def extract(obj, arr, key):
-            if isinstance(obj, dict):
-                for k, v in obj.items():
-                    if isinstance(v, (dict, list)):
-                        extract(v, arr, key)
-                    elif k == key:
-                        arr.append(v)
-            elif isinstance(obj, list):
-                for item in obj:
-                    extract(item, arr, key)
-            return arr
-
-        values = extract(obj, arr, key)
-        return values
-
-    print('wolfram-img!')
+    print('wolfram-img! '+question_string)
     res = wolframclient.query(question_string)
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
     
     imgs = json_extract(res, "img")
-    if not imgs:
+    if len(imgs) == 0:
         await ctx.send(">> Wolfram: No Images found.")
 
     for img in imgs:
         await ctx.send(">> Wolfram: "+ str(img.src))
     #await ctx.send(">> Wolfram: "+ str(next(res.results).text))
 
+@bot.event
+async def on_command_error(ctx, error):
+    print(error.__cause__)
+    await ctx.send(">> Error: "+str(error.__cause__))
 
 bot.run(TOKEN)
 
