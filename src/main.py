@@ -162,8 +162,10 @@ async def roll(ctx, *, question_string: str):
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
         return
-
-    message = next(res.results).text
+    try:
+        message = next(res.results).text
+    except StopIteration:
+        message = "No short result found. Try \"!wolfram-l\"."
     await ctx.send(">> Wolfram: "+ message)
 
 @bot.command(name='wolfram-l')
@@ -176,46 +178,14 @@ async def roll(ctx, *, question_string: str):
     if not res.success:
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
         return
+
     message = ""    
     for pod in res.pods:
         for sub in pod.subpods:
-            message += sub.plaintext + "\n"
+            message += str(sub.plaintext) + "\n"
     await ctx.send(">> Wolfram: "+ message)
 
-@bot.command(name='wolfram-t')
-async def roll(ctx, *, question_string: str):
-    em = Embed("""
-    <imagemap>
-       <rect left='12' top='8' right='39' bottom='28'
-         query='France+full+name'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.FullName-'
-         title='France full name' />
-       <rect left='39' top='8' right='76' bottom='28'
-         query='France+full+name'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.FullName-'
-         title='France full name' />
-       <rect left='12' top='42' right='39' bottom='62'
-         query='France+full+native+name'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.FullNativeNames-'
-         title='France full native name' />
-       <rect left='39' top='42' right='83' bottom='62'
-         query='France+full+native+name'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.FullNativeNames-'
-         title='France full native name' />
-       <rect left='83' top='42' right='120' bottom='62'
-         query='France+full+native+name'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.FullNativeNames-'
-         title='France full native name' />
-       <rect left='12' top='76' right='68' bottom='96'
-         query='France+internet+code'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.InternetCode-'
-         title='France internet code' />
-       <rect left='68' top='76' right='98' bottom='96'
-         query='France+internet+code'
-         assumptions='ClashPrefs_*Country.France.CountryProperty.InternetCode-'
-         title='France internet code' />
-     </imagemap>""")
-    await ctx.send(em)
+
 
 
 @bot.event
