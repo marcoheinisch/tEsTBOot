@@ -20,7 +20,7 @@ from discord.ext import tasks
 from dns.rcode import NOERROR
 
 import requests
-from nested_lookup import nested
+from nested_lookup import nested_lookup
 
 from mcstatus import MinecraftServer
 import wolframalpha
@@ -174,7 +174,7 @@ async def roll(ctx, *, question_string: str):
         await ctx.send(">> Wolfram Weisnisch Weiter... ")
         return
     
-    subpods = nested.nested_lookup("subpod", res)
+    subpods = nested_lookup("subpod", res)
     if len(subpods) == 0:
         await ctx.send(">> Wolfram: No Images found.")
         return
