@@ -15,7 +15,7 @@ class MyCommands(commands.Cog):
         }
 
 
-    @commands.command(name='random')
+    @commands.command(name='random', pass_context=True)
     async def random(self, ctx: commands.Context, number_of_dice: int, number_of_sides: int):
         """Simulates rolling dice."""
         print("roll event!")
@@ -27,6 +27,9 @@ class MyCommands(commands.Cog):
 
         timeout = self.config["timeout_random"]
         embed_var.add_field(name=f"Timeout", value=f"{timeout}s.", inline=True)
+
+        
+        await self.bot.delete_message(ctx.message)
         await ctx.send(embed=embed_var, delete_after=timeout)
 
 
