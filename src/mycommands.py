@@ -29,7 +29,6 @@ class MyCommands(commands.Cog):
         embed_var.add_field(name=f"Timeout", value=f"{timeout}s.", inline=True)
 
         ctx.message.delete()
-        await self.bot.delete_message(ctx.message)
         await ctx.send(embed=embed_var, delete_after=timeout)
 
 
