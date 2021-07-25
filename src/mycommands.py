@@ -28,8 +28,8 @@ class MyCommands(commands.Cog):
 
         embed_var = Embed(title=f"{number_of_dice} Würfel mit {number_of_sides} Seiten:",color=0x00ff00)
         for w in range(number_of_dice):
-            embed_var.add_field(values=w, inline=True)
-        embed_var.add_field(values=f"Timeout: {self.config.timeout_random}s.", inline=True)
+            embed_var.add_field(value=str(w), inline=True)
+        embed_var.add_field(value=f"Timeout: {self.config.timeout_random}s.", inline=True)
         await ctx.send(embed=embed_var, delate_after=self.config.timeout_random)
 
 
