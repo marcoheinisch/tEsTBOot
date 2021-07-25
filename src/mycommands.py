@@ -27,7 +27,7 @@ class MyCommands(commands.Cog):
 
         timeout = self.config["timeout_random"]
         embed_var.add_field(name=f"Timeout", value=f"{timeout}s.", inline=True)
-        await ctx.send(embed=embed_var, delate_after=timeout)
+        await ctx.send(embed=embed_var, delete_after=timeout)
 
 
     @commands.command(name='hi')
