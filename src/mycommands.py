@@ -20,17 +20,14 @@ class MyCommands(commands.Cog):
         """Simulates rolling dice."""
         print("roll event!")
 
-        dice = [
-            str(random.choice(range(1, number_of_sides + 1)))
-            for _ in range(number_of_dice)
-        ]
-        print(dice)
-
         embed_var = Embed(title=f"{number_of_dice} Würfel mit {number_of_sides} Seiten:",color=0x00ff00)
-        for w in range(number_of_dice):
-            embed_var.add_field(name="Wurf", value=str(w), inline=True)
-        embed_var.add_field(name=f"Timeout", value=f"{self.config.timeout_random}s.", inline=True)
-        await ctx.send(embed=embed_var, delate_after=self.config.timeout_random)
+        for index in range(number_of_dice):
+            w =  str(random.choice(range(1, number_of_sides + 1)))
+            embed_var.add_field(name=f"Wurf {index}", value=w, inline=True)
+
+        timeout = self.config["timeout_random"]
+        embed_var.add_field(name=f"Timeout", value=f"{timeout}s.", inline=True)
+        await ctx.send(embed=embed_var, delate_after=timeout)
 
 
     @commands.command(name='hi')
