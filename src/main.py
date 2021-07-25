@@ -19,7 +19,7 @@ from discord.ext import tasks
 from mcstatus import MinecraftServer
 import wolframalpha
 
-from commands import Commands
+from src.mycommands import MyCommands
 
 
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -115,7 +115,7 @@ async def on_command_error(ctx: commands.Context, error):
     print(error.__cause__)
     await ctx.send(">> Error: "+str(error.__cause__))
 
-bot.add_cog(Commands(bot, wolframclient))
+bot.add_cog(MyCommands(bot, wolframclient))
 
 bot.run(TOKEN)
 

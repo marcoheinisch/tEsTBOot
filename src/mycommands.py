@@ -1,19 +1,22 @@
 from discord.ext import commands
+from discord import Embed
 
 import random
 import requests
-import wolframalpha
 
-class Commands(commands.Cog):
+class MyCommands(commands.Cog):
     """A couple of commands."""
 
     def __init__(self, bot: commands.Bot, wolframclient):
         self.bot = bot
         self.wolframclient = wolframclient
+        self.config = {
+            "timeout_random": 60
+        }
 
 
-    @commands.command(name='roll_dice')
-    async def roll_dice(self, ctx: commands.Context, number_of_dice: int, number_of_sides: int):
+    @commands.command(name='random')
+    async def random(self, ctx: commands.Context, number_of_dice: int, number_of_sides: int):
         """Simulates rolling dice."""
         print("roll event!")
 
@@ -22,7 +25,12 @@ class Commands(commands.Cog):
             for _ in range(number_of_dice)
         ]
         print(dice)
-        await ctx.send(', '.join(dice))
+
+        embed_var = Embed(title=f"{number_of_dice} Würfel mit {number_of_sides} Seiten:",color=0x00ff00)
+        for w in range(number_of_dice):
+            embed_var.add_field(values=w, inline=True)
+        embed_var.add_field(values=f"Timeout: {self.config.timeout_random}s.", inline=True)
+        await ctx.send(embed=embed_var, delate_after=self.config.timeout_random)
 
 
     @commands.command(name='hi')
