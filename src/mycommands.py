@@ -4,6 +4,8 @@ from discord import Embed
 import random
 import requests
 
+COLOR = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000, 0x4682B4, 0x006400, 0x808080, 0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
+
 class MyCommands(commands.Cog):
     """A couple of commands."""
 
@@ -18,18 +20,19 @@ class MyCommands(commands.Cog):
     @commands.command(name='random')
     async def random(self, ctx: commands.Context, number_of_dice: int, number_of_sides: int):
         """Simulates rolling dice."""
-        print("roll event!")
+        print("random event!")
 
-        embed_var = Embed(title=f"{number_of_dice} Würfel mit {number_of_sides} Seiten:",color=0x00ff00)
-        for index in range(number_of_dice):
+        embed = Embed(title="Zufallszahlen",color=random.choice(COLOR), description=f"{number_of_dice} Würfel mit {number_of_sides} Seiten:")
+
+        for _ in range(number_of_dice):
             w =  str(random.choice(range(1, number_of_sides + 1)))
-            embed_var.add_field(name=f"Wurf {index}", value=w, inline=True)
+            embed.add_field(name=w, value = "_"*len(w)+"/"+str(number_of_sides), inline=True)
 
-        timeout = self.config["timeout_random"]
-        embed_var.add_field(name=f"Timeout", value=f"{timeout}s.", inline=True)
+        timeout = self.config["timeout_random"]        
+        embed.set_footer(text=f"Selbstlöschend nach {timeout} Sekunden.")
 
         await ctx.message.delete()
-        await ctx.send(embed=embed_var, delete_after=timeout)
+        await ctx.send(embed=embed, delete_after=timeout)
 
 
     @commands.command(name='hi')
