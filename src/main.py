@@ -35,7 +35,10 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "is lonely and want's to talk", 
                     "is waiting for you ",
                     "is sitting alone here",
-                    "<put here some random text stuff>"
+                    "<put here some random text stuff>",
+                    "wants to procrastinate",
+                    "is dying of boredom",
+                    "has a quarterlife-crisis"
                     ]
 
 basic_activity_name =" in der Cloud! ☁"
