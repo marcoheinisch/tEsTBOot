@@ -38,7 +38,8 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "wants to procrastinate",
                     "is dying of boredom",
                     "has a quarterlife-crisis",
-                    "is plotting to overthrow the government."
+                    "is plotting to overthrow the government.",
+                    "is hiding a bomb bellow his desk."
                     ]
 
 basic_activity_name =" in der Cloud! ☁"
