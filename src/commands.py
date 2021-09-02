@@ -159,7 +159,7 @@ class AWSCommands(commands.Cog):
     # Tasks
 
     @tasks.loop(minutes=1)
-    async def startuploop(self, bot):
+    async def startuploop(self):
         print("loopaws")
 
         self.aws_loading_count += 1
@@ -174,7 +174,7 @@ class AWSCommands(commands.Cog):
             if self.aws_status == 1:
                 self.aws_status = 0
 
-        channel = bot.get_channel(852114543759982592)
+        channel = self.bot.get_channel(852114543759982592)
         if self.aws_status == 0:
             await channel.edit(name='❌OFFLINE')
         if self.aws_status == 1:
