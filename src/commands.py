@@ -161,7 +161,7 @@ class AWSCommands(commands.Cog):
 
     # Tasks
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=30)
     async def startuploop(self):
         print("loopaws")
 
@@ -186,7 +186,6 @@ class AWSCommands(commands.Cog):
                 self.startuploop.stop()
             if self.aws_status == 1:
                 await self.channel.edit(name=f"🟩-mc-{players}p-online")
-                self.startuploop.change_interval(seconds=30)
             if self.aws_status == 2:
                 await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
             if self.aws_status == 22:
