@@ -153,6 +153,14 @@ class AWSCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
        
+        self.config = {}
+
+
+    @commands.command(name='aws')
+    async def aws(self, ctx: commands.Context, command: str):
+        """Controll minecraft server hosted on aws ec2 instance. Type \"aws -start\", \"aws -stop\". """
+        print(f"aws + {command}.")
+
         session = boto3.Session(
             aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
             aws_secret_access_key=AWS_SERVER_SECRET_KEY,
@@ -161,20 +169,13 @@ class AWSCommands(commands.Cog):
 
         ec2 = session.resource('ec2')
         self.instance = ec2.Instance('i-07baa970d1c82bb08')
-        self.config = {}
-
-
-    @commands.command(name='aws')
-    async def aws(self, ctx: commands.Context, command: str):
-        """Controll minecraft server hosted on aws ec2 instance. Type \"aws -start\", \"aws -stop\". """
-        print(f"aws + {command}.")
         
         def turnOffInstance():
             try:
                 self.instance.stop(False, False)
                 return True
             except Exception as e:
-                print(e.with_traceback)
+                print(e)
                 return False
 
         def turnOnInstance():
