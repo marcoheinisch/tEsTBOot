@@ -17,16 +17,14 @@ from discord.ext import commands
 from discord.ext import tasks
 
 from mcstatus import MinecraftServer
-import wolframalpha
 
-from src.mycommands import MyCommands
+from src.commands import MainCommands, WolframCommands, AWSCommands
 
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
-WOLFRAM_APPID = os.getenv('WOLFRAM_APPID')
 
-MC_SERVER_CHECK_TIME = 10 * 60
+MC_SERVER_CHECK_TIME = 10 #minutes
 MC_SERVER_ADDRESS = "ratius99.aternos.me"
 MC_SERVER_STATUS_INT = 0
 
@@ -44,17 +42,17 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
 
 basic_activity_name =" in der Cloud! ☁"
 bot = commands.Bot(command_prefix="!", activity= discord.Game(name=basic_activity_name))
-wolframclient = wolframalpha.Client(WOLFRAM_APPID)
+
 
 # Initialization errors
 
-if not (TOKEN and GUILD and WOLFRAM_APPID):
+if not (TOKEN and GUILD):
     raise RuntimeError("Missing environmental variable.")
 
 
 # Tasks
 
-@tasks.loop(minutes=10)
+@tasks.loop(minutes=MC_SERVER_CHECK_TIME)
 async def check_mc_status():
     print("loopmc")
 
@@ -104,7 +102,7 @@ async def on_ready():
 async def on_member_join(member):
     await member.create_dm()
     await member.dm_channel.send(
-        f'Hi {member.name}, hier ist der nerfffiger Diiscordbot aus Konziis!'
+        f'Hi {member.name}, hier issst der nerfffiger Diiscordbot aus Konziis!'
     )
 
 @bot.event
@@ -119,7 +117,9 @@ async def on_command_error(ctx: commands.Context, error):
     print(error.__cause__)
     await ctx.send(">> Error: "+str(error.__cause__))
 
-bot.add_cog(MyCommands(bot, wolframclient))
+bot.add_cog(MainCommands(bot))
+bot.add_cog(WolframCommands(bot))
+bot.add_cog(AWSCommands(bot))
 
 bot.run(TOKEN)
 

@@ -1,17 +1,22 @@
 from discord.ext import commands
 from discord import Embed
 
-import random
-import requests
+import random, requests, wolframalpha, os, boto3
 
 COLOR = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000, 0x4682B4, 0x006400, 0x808080, 0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
 
-class MyCommands(commands.Cog):
+AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
+AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
+WOLFRAM_APPID = os.getenv('WOLFRAM_APPID')
+
+if not (WOLFRAM_APPID and AWS_SERVER_SECRET_KEY and AWS_SERVER_PUBLIC_KEY):
+    raise RuntimeError("Missing environmental variable (2).")
+
+class MainCommands(commands.Cog):
     """A couple of commands."""
 
-    def __init__(self, bot: commands.Bot, wolframclient):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.wolframclient = wolframclient
         self.config = {
             "timeout_random": 60
         }
@@ -74,6 +79,16 @@ class MyCommands(commands.Cog):
         await ctx.send(">> Molecule: "+ str(url1))
         
 
+
+class WolframCommands(commands.Cog):
+    """A couple of commands."""
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.wolframclient = wolframalpha.Client(WOLFRAM_APPID)
+        self.config = {}
+
+
     @commands.command(name='wolfram')
     async def wolfram(self, ctx: commands.Context, *, question_string: str):
         """Use Wolfram Alpha (API) to solve Math or ask random stuff It can do ...
@@ -130,4 +145,68 @@ class MyCommands(commands.Cog):
             if pod.title == image_title:
                 message += str(pod.subpod.img.src) + "\n"
         await ctx.send(">> Wolfram: "+ message)
+
+
+class AWSCommands(commands.Cog):
+    """A couple of commands."""
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+       
+        session = boto3.Session(
+            aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
+            aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+        )
+
+        ec2 = session.resource('ec2')
+        self.instance = ec2.Instance('i-06bc2e80c17a5636c')
+        self.config = {}
+
+
+    @commands.command(name='aws')
+    async def aws(self, ctx: commands.Context, command: str):
+        """Controll minecraft server hosted on aws ec2 instance. Type \"aws -start\", \"aws -stop\". """
+        print("random event!")
+        
+        def turnOffInstance():
+            try:
+                self.instance.stop(False, False)
+                return True
+            except:
+                return False
+
+        def turnOnInstance():
+            try:
+                self.instance.start()
+                return True
+            except:
+                return False
+
+        def getInstanceState():
+            return self.instance.state['Name']
+
+        def rebootInstance():
+            try:
+                self.instance.reboot()
+                return True
+            except:
+                return False
+
+        if 'stop' in command:
+            if turnOffInstance():
+                await  ctx.send('AWS Instance stopping')
+            else:
+                await ctx.send('Error stopping AWS Instance')
+        elif 'start' in command:
+            if turnOnInstance():
+                await ctx.send('AWS Instance starting')
+            else:
+                await ctx.send('Error starting AWS Instance')
+        elif 'state' in command:
+            await ctx.send('AWS Instance state is: ' + getInstanceState())
+        elif 'reboot' in command:
+            if rebootInstance():
+                await ctx.send('AWS Instance rebooting')
+            else:
+                await ctx.send('Error rebooting AWS Instance')
 

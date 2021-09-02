@@ -4,3 +4,4 @@ requests
 mcstatus
 wolframalpha
 nested-lookup
+boto3
