@@ -155,7 +155,6 @@ class AWSCommands(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.startuploop.start()
         self.aws_status = 0
         self.aws_loading_count = 0
         self.channel = 0
@@ -219,6 +218,8 @@ class AWSCommands(commands.Cog):
         def turnOnInstance():
             try:
                 self.instance.start()
+
+                self.aws_status = 2
                 self.startuploop.start()
                 return True
             except Exception as e:
