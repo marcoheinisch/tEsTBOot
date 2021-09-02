@@ -158,9 +158,7 @@ class AWSCommands(commands.Cog):
         self.startuploop.start()
         self.aws_status = 0
         self.aws_loading_count = 0
-
-        guild = discord.utils.get(bot.guilds, name=GUILD)
-        self.channel = discord.utils.get(guild.text_channels, id=852114543759982592)
+        self.channel = 0
 
     # Tasks
 
@@ -180,20 +178,20 @@ class AWSCommands(commands.Cog):
         except Exception:
             if self.aws_status == 1:
                 self.aws_status = 0
-
+        self.channel = self.bot.get_channel(852114543759982592)
         if not self.channel:
             print("channel not found")
-            return
-        if self.aws_status == 0:
-            await self.channel.edit(name='🟥-mc-OFFLINE')
-            self.startuploop.stop()
-        if self.aws_status == 1:
-            await self.channel.edit(name=f"🟩-mc-{players}p-online")
-            self.startuploop.change_interval(seconds=30)
-        if self.aws_status == 2:
-            await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
-        if self.aws_status == 22:
-            await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}STARTING')
+        else:
+            if self.aws_status == 0:
+                await self.channel.edit(name='🟥-mc-OFFLINE')
+                self.startuploop.stop()
+            if self.aws_status == 1:
+                await self.channel.edit(name=f"🟩-mc-{players}p-online")
+                self.startuploop.change_interval(seconds=30)
+            if self.aws_status == 2:
+                await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
+            if self.aws_status == 22:
+                await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}STARTING')
 
     @commands.command(name='aws')
     async def aws(self, ctx: commands.Context, command: str):
