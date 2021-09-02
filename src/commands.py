@@ -174,7 +174,7 @@ class AWSCommands(commands.Cog):
             if self.aws_status == 1:
                 self.aws_status = 0
 
-        channel = self.bot.get_channel(852114543759982592)
+        channel = self.bot.get_channel('852114543759982592')
         if self.aws_status == 0:
             await channel.edit(name='❌OFFLINE')
         if self.aws_status == 1:
