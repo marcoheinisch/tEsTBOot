@@ -167,20 +167,22 @@ class AWSCommands(commands.Cog):
     @commands.command(name='aws')
     async def aws(self, ctx: commands.Context, command: str):
         """Controll minecraft server hosted on aws ec2 instance. Type \"aws -start\", \"aws -stop\". """
-        print("random event!")
+        print(f"aws + {command}.")
         
         def turnOffInstance():
             try:
                 self.instance.stop(False, False)
                 return True
-            except:
+            except Exception as e:
+                print(e.with_traceback)
                 return False
 
         def turnOnInstance():
             try:
                 self.instance.start()
                 return True
-            except:
+            except Exception as e:
+                print(e)
                 return False
 
         def getInstanceState():
@@ -190,7 +192,8 @@ class AWSCommands(commands.Cog):
             try:
                 self.instance.reboot()
                 return True
-            except:
+            except Exception as e:
+                print(e)
                 return False
 
         if 'stop' in command:
