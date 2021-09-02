@@ -153,7 +153,7 @@ class AWSCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.startuploop.start()
-        self.aws_status = 0
+        self.aws_status = 2
         self.aws_loading_count = 0
 
     # Tasks
@@ -174,7 +174,10 @@ class AWSCommands(commands.Cog):
             if self.aws_status == 1:
                 self.aws_status = 0
 
-        channel = self.bot.get_channel('852114543759982592')
+        channel = self.bot.get_channel(852114543759982592)
+        if not channel:
+            print("channel not found")
+            return
         if self.aws_status == 0:
             await channel.edit(name='❌OFFLINE')
         if self.aws_status == 1:
