@@ -156,6 +156,7 @@ class AWSCommands(commands.Cog):
         session = boto3.Session(
             aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
             aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+            region_name="eu-central-1"
         )
 
         ec2 = session.resource('ec2')
