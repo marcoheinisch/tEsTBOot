@@ -158,7 +158,7 @@ class AWSCommands(commands.Cog):
 
     # Tasks
 
-    @commands.tasks.loop(minutes=1)
+    @tasks.loop(minutes=1)
     async def startuploop(self, bot):
         print("loopaws")
 
