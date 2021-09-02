@@ -4,6 +4,8 @@ import random
 import requests
 
 import wolframalpha
+
+import discord
 from discord import Embed
 from discord.ext import commands
 from discord.ext import tasks
@@ -16,6 +18,7 @@ LOADING_EMOJI = ["➕", "➗", "➖", "➗"]
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
 WOLFRAM_APPID = os.getenv('WOLFRAM_APPID')
+GUILD = os.getenv('DISCORD_GUILD')
 
 conf = {
     "timeout_random": 60,
@@ -156,6 +159,9 @@ class AWSCommands(commands.Cog):
         self.aws_status = 2
         self.aws_loading_count = 0
 
+        guild = discord.utils.get(bot.guilds, name=GUILD)
+        self.channel = discord.utils.get(guild.text_channels, id=852114543759982592)
+
     # Tasks
 
     @tasks.loop(minutes=1)
@@ -163,6 +169,7 @@ class AWSCommands(commands.Cog):
         print("loopaws")
 
         self.aws_loading_count += 1
+        players=0
 
         try:
             server = MinecraftServer.lookup("3.125.141.61")
@@ -174,18 +181,17 @@ class AWSCommands(commands.Cog):
             if self.aws_status == 1:
                 self.aws_status = 0
 
-        channel = self.bot.get_channel(852114543759982592)
-        if not channel:
+        if not self.channel:
             print("channel not found")
             return
         if self.aws_status == 0:
-            await channel.edit(name='❌OFFLINE')
+            await self.channel.edit(name='❌OFFLINE')
         if self.aws_status == 1:
-            await channel.edit(name=f"✔ONLINE ({str(players) if players else 0} Spieler)")
+            await self.channel.edit(name=f"✔ONLINE ({str(players) if players else 0} Spieler)")
         if self.aws_status == 2:
-            await channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
+            await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
         if self.aws_status == 22:
-            await channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}STARTING')
+            await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}STARTING')
 
     @commands.command(name='aws')
     async def aws(self, ctx: commands.Context, command: str):
