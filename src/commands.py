@@ -13,7 +13,7 @@ from mcstatus import MinecraftServer
 
 COLOR = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000, 0x4682B4, 0x006400, 0x808080,
          0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
-LOADING_EMOJI = ["➕", "➗", "➖", "➗"]
+LOADING_EMOJI = ["⬜", "◻", "▫", "◻"]
 
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
@@ -156,7 +156,7 @@ class AWSCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.startuploop.start()
-        self.aws_status = 2
+        self.aws_status = 0
         self.aws_loading_count = 0
 
         guild = discord.utils.get(bot.guilds, name=GUILD)
@@ -164,12 +164,12 @@ class AWSCommands(commands.Cog):
 
     # Tasks
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(seconds=10)
     async def startuploop(self):
         print("loopaws")
 
         self.aws_loading_count += 1
-        players=0
+        players = 0
 
         try:
             server = MinecraftServer.lookup("3.125.141.61")
@@ -185,9 +185,11 @@ class AWSCommands(commands.Cog):
             print("channel not found")
             return
         if self.aws_status == 0:
-            await self.channel.edit(name='❌OFFLINE')
+            await self.channel.edit(name='🟥-mc-OFFLINE')
+            self.startuploop.stop()
         if self.aws_status == 1:
-            await self.channel.edit(name=f"✔ONLINE ({str(players) if players else 0} Spieler)")
+            await self.channel.edit(name=f"🟩-mc-{players}p-online")
+            self.startuploop.change_interval(seconds=30)
         if self.aws_status == 2:
             await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
         if self.aws_status == 22:
@@ -210,6 +212,7 @@ class AWSCommands(commands.Cog):
         def turnOffInstance():
             try:
                 self.instance.stop()
+                self.startuploop.stop()
                 return True
             except Exception as e:
                 print(e)
