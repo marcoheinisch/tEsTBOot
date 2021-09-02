@@ -160,7 +160,7 @@ class AWSCommands(commands.Cog):
         )
 
         ec2 = session.resource('ec2')
-        self.instance = ec2.Instance('i-06bc2e80c17a5636c')
+        self.instance = ec2.Instance('i-07baa970d1c82bb08')
         self.config = {}
 
 
