@@ -172,7 +172,7 @@ class AWSCommands(commands.Cog):
         
         def turnOffInstance():
             try:
-                self.instance.stop(False, False)
+                self.instance.stop()
                 return True
             except Exception as e:
                 print(e)
