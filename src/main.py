@@ -107,7 +107,6 @@ async def on_ready():
     check_mc_status.start()
 
     channel = bot.get_channel(conf["status_channel"])
-    await channel.send(controller_message)
     msg = await channel.fetch_message(REACTION_MESSAGE_ID)
     await msg.edit(content=controller_message)
     await msg.add_reaction('❌')
