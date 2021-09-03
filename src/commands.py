@@ -23,7 +23,9 @@ GUILD = os.getenv('DISCORD_GUILD')
 conf = {
     "timeout_random": 60,
     "aws_mc_checktime": 1,
-    "aws_mc_server_adress": "ratius99.aternos.me"
+    "aws_mc_server_adress": "3.125.141.61",
+    "status_channel": 852114543759982592,
+    "status_massage": 883304166179631165
 }
 
 
@@ -161,7 +163,7 @@ class AWSCommands(commands.Cog):
 
     # Tasks
 
-    @tasks.loop(seconds=30)
+    @tasks.loop(seconds=10)
     async def startuploop(self):
         print("loopaws")
 
@@ -169,31 +171,32 @@ class AWSCommands(commands.Cog):
         players = 0
 
         try:
-            server = MinecraftServer.lookup("3.125.141.61")
+            server = MinecraftServer.lookup(conf["aws_mc_server_adress"])
             status = server.status()
             players = status.players.online
+            if self.aws_status in [0,2]:
+                self.startuploop.change_interval(minutes=5)
             self.aws_status = 1
 
         except Exception:
             if self.aws_status == 1:
                 self.aws_status = 0
-        self.channel = self.bot.get_channel(852114543759982592)
+
+        self.channel = self.bot.get_channel(conf["status_channel"])
         if not self.channel:
-            print("channel not found")
+            print("status_channel not found")
         else:
             if self.aws_status == 0:
-                await self.channel.edit(name='❌-mc-OFFLINE')
+                await self.channel.edit(name='❌-aws-offline')
                 self.startuploop.stop()
             if self.aws_status == 1:
-                await self.channel.edit(name=f"✅-mc-{players}p-online")
+                await self.channel.edit(name=f"✅-aws-online-{players}p")
             if self.aws_status == 2:
-                await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}WAITING')
-            if self.aws_status == 22:
-                await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}STARTING')
+                await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}-starting')
 
     @commands.command(name='aws')
     async def aws(self, ctx: commands.Context, command: str):
-        """Controll minecraft server hosted on aws ec2 instance. Type \"aws -start\", \"aws -stop\". """
+        """Controll minecraft server hosted on aws ec2 instance. Type \"aws start\", \"aws stop\". """
         print(f"aws + {command}.")
 
         session = boto3.Session(
@@ -207,8 +210,8 @@ class AWSCommands(commands.Cog):
 
         def turnOffInstance():
             try:
+                self.aws_status = 0
                 self.instance.stop()
-                self.startuploop.stop()
                 return True
             except Exception as e:
                 print(e)
@@ -253,3 +256,4 @@ class AWSCommands(commands.Cog):
                 await ctx.send('AWS Instance rebooting')
             else:
                 await ctx.send('Error rebooting AWS Instance')
+

@@ -38,8 +38,11 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "is hiding a bomb bellow his desk."
                     ]
 
+intents = discord.Intents.default()
+intents.reactions = True
 basic_activity_name = " in der Cloud! ☁"
-bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name))
+bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name), intents=intents)
+
 
 # Tasks
 
@@ -59,8 +62,7 @@ async def check_mc_status():
     except Exception:
         mc_status = " mit \"bad status error\" :-("
 
-    # if no error happend:
-    if players:
+    if players:  # if no error happend:
         mc_status = " mit " + ("einem Spieler" if (players == 1) else str(players) + " Spielern") + " MC!"
 
     await bot.change_presence(activity=discord.Game(name=mc_status))
@@ -112,6 +114,13 @@ async def on_message(message):
 async def on_command_error(ctx: commands.Context, error):
     print(error.__cause__)
     await ctx.send(">> Error: " + str(error.__cause__))
+
+
+def on_raw_reaction_add(payload):
+    print("reaction")
+    if payload.message_id == 0 and payload.event_type == "REACTION_ADD" :
+        if payload.emoji.name == ":sweat_smile":
+            pass
 
 
 bot.add_cog(MainCommands(bot))
