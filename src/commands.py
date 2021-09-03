@@ -1,3 +1,4 @@
+from logging import fatal
 import boto3
 import os
 import random
@@ -13,7 +14,6 @@ from mcstatus import MinecraftServer
 
 COLOR = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000, 0x4682B4, 0x006400, 0x808080,
          0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
-LOADING_EMOJI = ["➕", "➗", "➖", "➗"]
 
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
@@ -157,42 +157,29 @@ class AWSCommands(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.aws_status = 0
-        self.aws_loading_count = 0
+        self.aws_starting = False
         self.channel = 0
 
     # Tasks
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=20)
     async def startuploop(self):
         print("loopaws")
 
-        self.aws_loading_count += 1
         players = 0
+
+        self.channel = self.bot.get_channel(conf["status_channel"])
+        if not self.channel: return
 
         try:
             server = MinecraftServer.lookup(conf["aws_mc_server_adress"])
             status = server.status()
             players = status.players.online
-            if self.aws_status in [0,2]:
-                self.startuploop.change_interval(minutes=5)
-            self.aws_status = 1
-
+            await self.channel.edit(name=f"✅-aws-online-{players}p")
+            self.aws_starting = False
+            self.startuploop.change_interval(minutes=10)
         except Exception:
-            if self.aws_status == 1:
-                self.aws_status = 0
-
-        self.channel = self.bot.get_channel(conf["status_channel"])
-        if not self.channel:
-            print("status_channel not found")
-        else:
-            if self.aws_status == 0:
-                await self.channel.edit(name='❌-aws-offline')
-                self.startuploop.stop()
-            if self.aws_status == 1:
-                await self.channel.edit(name=f"✅-aws-online-{players}p")
-            if self.aws_status == 2:
-                await self.channel.edit(name=f'{LOADING_EMOJI[self.aws_loading_count % len(LOADING_EMOJI)]}-starting')
+            await self.channel.edit(name=f"➗-aws-error")
 
     @commands.command(name='aws')
     async def aws(self, ctx: commands.Context, command: str):
@@ -208,10 +195,10 @@ class AWSCommands(commands.Cog):
         ec2 = session.resource('ec2')
         self.instance = ec2.Instance('i-07baa970d1c82bb08')
 
-        def turnOffInstance():
+        async def turnOffInstance():
             try:
-                self.aws_status = 0
                 self.instance.stop()
+                await self.channel.edit(name='❌-aws-offline')
                 return True
             except Exception as e:
                 print(e)
@@ -220,8 +207,9 @@ class AWSCommands(commands.Cog):
         def turnOnInstance():
             try:
                 self.instance.start()
+                self.channel.edit(name=f'➗-starting')
 
-                self.aws_status = 2
+                self.aws_starting = True
                 self.startuploop.start()
                 return True
             except Exception as e:
@@ -231,16 +219,8 @@ class AWSCommands(commands.Cog):
         def getInstanceState():
             return self.instance.state['Name']
 
-        def rebootInstance():
-            try:
-                self.instance.reboot()
-                return True
-            except Exception as e:
-                print(e)
-                return False
-
         if 'stop' in command:
-            if turnOffInstance():
+            if await turnOffInstance():
                 await ctx.send('AWS Instance stopping')
             else:
                 await ctx.send('Error stopping AWS Instance')
@@ -251,9 +231,4 @@ class AWSCommands(commands.Cog):
                 await ctx.send('Error starting AWS Instance')
         elif 'state' in command:
             await ctx.send('AWS Instance state is: ' + getInstanceState())
-        elif 'reboot' in command:
-            if rebootInstance():
-                await ctx.send('AWS Instance rebooting')
-            else:
-                await ctx.send('Error rebooting AWS Instance')
 

@@ -25,6 +25,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 MC_SERVER_CHECK_TIME = 10  # minutes
 MC_SERVER_ADDRESS = "ratius99.aternos.me"
 MC_SERVER_STATUS_INT = 0
+REACTION_MESSAGE_ID = 883304166179631165
 
 MESSAGE_CHANNEL = "📯mitteilungen"
 TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
@@ -42,7 +43,13 @@ intents = discord.Intents.default()
 intents.reactions = True
 basic_activity_name = " in der Cloud! ☁"
 bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name), intents=intents)
-
+conf = {
+    "timeout_random": 60,
+    "aws_mc_checktime": 1,
+    "aws_mc_server_adress": "3.125.141.61",
+    "status_channel": 852114543759982592,
+    "status_massage": 883304166179631165
+}
 
 # Tasks
 
@@ -116,11 +123,13 @@ async def on_command_error(ctx: commands.Context, error):
     await ctx.send(">> Error: " + str(error.__cause__))
 
 
-def on_raw_reaction_add(payload):
+@bot.event
+async def on_raw_reaction_add(payload):
     print("reaction")
-    if payload.message_id == 0 and payload.event_type == "REACTION_ADD" :
+    if payload.message_id == REACTION_MESSAGE_ID:
         if payload.emoji.name == ":sweat_smile":
-            pass
+            channel = bot.get_channel(conf["status_channel"])
+            await channel.edit(name=f"✅-aws-test")
 
 
 bot.add_cog(MainCommands(bot))
