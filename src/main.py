@@ -125,9 +125,9 @@ async def on_command_error(ctx: commands.Context, error):
 
 @bot.event
 async def on_raw_reaction_add(payload):
-    print(f"reaction {payload.message_id}")
+    print(f"reaction {payload.emoji.name}")
     if payload.message_id == REACTION_MESSAGE_ID:
-        if payload.emoji.name == ":sweat_smile":
+        if payload.emoji.name == "sweat_smile":
             channel = bot.get_channel(conf["status_channel"])
             await channel.edit(name=f"✅-aws-test")
 
