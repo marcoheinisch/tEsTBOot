@@ -18,7 +18,7 @@ from discord.ext import tasks
 
 import boto3
 from mcstatus import MinecraftServer
-from src.commands import MainCommands, WolframCommands, AWSCommands
+from src.commands import MainCommands, WolframCommands
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
@@ -47,7 +47,7 @@ conf = {
     "aws_mc_checktime": 1,
     "aws_mc_server_adress": "3.125.141.61",
     "status_channel": 852114543759982592,
-    "status_massage": 883304166179631165
+    "status_massage": 883455925090930728
 }
 
 intents = discord.Intents.default()
@@ -55,14 +55,7 @@ intents.reactions = True
 basic_activity_name = " in der Cloud! ☁"
 bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name), intents=intents)
 
-session = boto3.Session(
-    aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
-    aws_secret_access_key=AWS_SERVER_SECRET_KEY,
-    region_name="eu-central-1"
-)
-
-ec2 = session.resource('ec2')
-instance = ec2.Instance('i-07baa970d1c82bb08')
+controller_message = "Kontrolliere hier mit Reaktionen den tEsTOot:\n 1) Starte mit :white_check_mark: und stoppe mit :x: einen Amazon Minecraftserver (ip: 3.125.141.61).\n 2) mal sehn'..."
 
 
 # Tasks
@@ -114,6 +107,12 @@ async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     check_mc_status.start()
 
+    channel = bot.get_channel(conf["status_channel"])
+    msg = await channel.fetch_message(REACTION_MESSAGE_ID)
+    await msg.edit(content=controller_message)
+    await msg.add_reaction('❌')
+    await msg.add_reaction('✅')
+
 
 @bot.event
 async def on_member_join(member):
@@ -139,16 +138,26 @@ async def on_command_error(ctx: commands.Context, error):
 
 @bot.event
 async def on_raw_reaction_add(payload):
-    print(f"reaction {payload.emoji.name}")
-
     if payload.message_id == REACTION_MESSAGE_ID:
+        print(f"reaction {payload.emoji.name}")
+
+        session = boto3.Session(
+            aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
+            aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+            region_name="eu-central-1"
+        )
+        ec2 = session.resource('ec2')
+        instance = ec2.Instance('i-07baa970d1c82bb08')
+
         channel = bot.get_channel(conf["status_channel"])
+
         if payload.emoji.name == "✅":
             try:
                 instance.start()
                 await channel.edit(name=f"✅-aws-starting")
             except Exception as e:
                 print(e)
+
         if payload.emoji.name == "❌":
             try:
                 instance.stop()
@@ -156,9 +165,14 @@ async def on_raw_reaction_add(payload):
             except Exception as e:
                 print(e)
 
+        if payload.emoji.name == "⏪":
+            pass
+
+        if payload.emoji.name == "⏩":
+            pass
+
 bot.add_cog(MainCommands(bot))
 bot.add_cog(WolframCommands(bot))
-bot.add_cog(AWSCommands(bot))
 
 bot.run(TOKEN)
 
