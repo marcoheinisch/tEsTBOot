@@ -16,11 +16,14 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 
+import boto3
 from mcstatus import MinecraftServer
 from src.commands import MainCommands, WolframCommands, AWSCommands
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
+AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
 
 MC_SERVER_CHECK_TIME = 10  # minutes
 MC_SERVER_ADDRESS = "ratius99.aternos.me"
@@ -39,10 +42,6 @@ TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
                     "is hiding a bomb bellow his desk."
                     ]
 
-intents = discord.Intents.default()
-intents.reactions = True
-basic_activity_name = " in der Cloud! ☁"
-bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name), intents=intents)
 conf = {
     "timeout_random": 60,
     "aws_mc_checktime": 1,
@@ -50,6 +49,21 @@ conf = {
     "status_channel": 852114543759982592,
     "status_massage": 883304166179631165
 }
+
+intents = discord.Intents.default()
+intents.reactions = True
+basic_activity_name = " in der Cloud! ☁"
+bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name), intents=intents)
+
+session = boto3.Session(
+    aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
+    aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+    region_name="eu-central-1"
+)
+
+ec2 = session.resource('ec2')
+instance = ec2.Instance('i-07baa970d1c82bb08')
+
 
 # Tasks
 
@@ -126,11 +140,21 @@ async def on_command_error(ctx: commands.Context, error):
 @bot.event
 async def on_raw_reaction_add(payload):
     print(f"reaction {payload.emoji.name}")
-    if payload.message_id == REACTION_MESSAGE_ID:
-        if payload.emoji.name == "😅":
-            channel = bot.get_channel(conf["status_channel"])
-            await channel.edit(name=f"✅-aws-test")
 
+    if payload.message_id == REACTION_MESSAGE_ID:
+        channel = bot.get_channel(conf["status_channel"])
+        if payload.emoji.name == "✅":
+            try:
+                instance.start()
+                await channel.edit(name=f"✅-aws-starting")
+            except Exception as e:
+                print(e)
+        if payload.emoji.name == "❌":
+            try:
+                instance.stop()
+                await channel.edit(name='❌-aws-stopping')
+            except Exception as e:
+                print(e)
 
 bot.add_cog(MainCommands(bot))
 bot.add_cog(WolframCommands(bot))
