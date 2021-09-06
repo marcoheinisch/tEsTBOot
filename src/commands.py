@@ -3,10 +3,11 @@ import random
 import requests
 
 import wolframalpha
-from main import Conf
 
 from discord import Embed
 from discord.ext import commands
+
+from src.Configuration import Conf
 
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
