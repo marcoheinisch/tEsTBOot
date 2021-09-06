@@ -78,7 +78,7 @@ intents.reactions = True
 bot = commands.Bot(command_prefix="!", activity=discord.Game(name=Conf.activity_name_basic), intents=intents)
 
 
-def update_status_channel(known_awsstat=ServerStat.none):
+async def update_status_channel(known_awsstat=ServerStat.none):
     channel = bot.get_channel(Conf.channel_status)
 
     if known_awsstat:
@@ -142,7 +142,7 @@ async def check_mc_status():
 async def check_aws_mc_status():
     print("loopawsmc")
 
-    serverstat = update_status_channel()
+    serverstat = await update_status_channel()
 
     if serverstat != ServerStat.starting and serverstat != ServerStat.starting:
         check_aws_mc_status.stop()
@@ -172,7 +172,7 @@ async def on_voice_state_update(member, before, after):
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     check_mc_status.start()
-    update_status_channel()
+    await update_status_channel()
 
 
 @bot.event
@@ -208,22 +208,22 @@ async def on_raw_reaction_add(payload):
         if payload.emoji.name == "✅":
             try:
                 instance.start()
-                update_status_channel(known_awsstat=ServerStat.starting)
+                await update_status_channel(known_awsstat=ServerStat.starting)
                 instance.wait_until_running()
                 check_aws_mc_status.start()
             except Exception as e:
                 print(e)
-                update_status_channel(known_awsstat=ServerStat.error)
+                await update_status_channel(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "❌":
             try:
                 instance.stop()
-                update_status_channel(known_awsstat=ServerStat.stopping)
+                await update_status_channel(known_awsstat=ServerStat.stopping)
                 instance.wait_until_stopped()
-                update_status_channel(known_awsstat=ServerStat.offline)
+                await update_status_channel(known_awsstat=ServerStat.offline)
             except Exception as e:
                 print(e)
-                update_status_channel(known_awsstat=ServerStat.error)
+                await update_status_channel(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "⏪":
             pass
