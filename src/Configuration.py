@@ -1,5 +1,5 @@
 class Conf:
-    ec2_instance_id = 'i-05ca5f05f965b3a4b'
+    ec2_instance_id = 'i-07baa970d1c82bb08'
 
     channel_welcome = 752618408939487292
     channel_status = 852114543759982592
