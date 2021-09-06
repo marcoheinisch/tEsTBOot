@@ -1,32 +1,17 @@
-from logging import fatal
-import boto3
 import os
 import random
 import requests
 
 import wolframalpha
+from main import Conf
 
-import discord
 from discord import Embed
 from discord.ext import commands
-from discord.ext import tasks
-from mcstatus import MinecraftServer
-
-COLOR = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000, 0x4682B4, 0x006400, 0x808080,
-         0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
 
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
 WOLFRAM_APPID = os.getenv('WOLFRAM_APPID')
 GUILD = os.getenv('DISCORD_GUILD')
-
-conf = {
-    "timeout_random": 60,
-    "aws_mc_checktime": 1,
-    "aws_mc_server_adress": "3.125.141.61",
-    "status_channel": 852114543759982592,
-    "status_massage": 883304166179631165
-}
 
 
 class MainCommands(commands.Cog):
@@ -40,14 +25,14 @@ class MainCommands(commands.Cog):
         """Simulates rolling dice."""
         print("random event!")
 
-        embed = Embed(title="Zufallszahlen", color=random.choice(COLOR),
+        embed = Embed(title="Zufallszahlen", color=random.choice(Conf.colors),
                       description=f"{number_of_dice} Würfel mit {number_of_sides} Seiten:")
 
         for _ in range(number_of_dice):
             w = str(random.choice(range(1, number_of_sides + 1)))
             embed.add_field(name=w, value="_" * len(w) + "/" + str(number_of_sides), inline=True)
 
-        timeout = conf["timeout_random"]
+        timeout = Conf.time_delete_random
         embed.set_footer(text=f"Selbstlöschend nach {timeout} Sekunden.")
 
         await ctx.message.delete()
@@ -81,7 +66,7 @@ class MainCommands(commands.Cog):
 
     @commands.command(name='molec')
     async def molec(self, ctx: commands.Context, smile_string: str):
-        """'Visualize a given molecule string. Supports MIME and other structural identifier. 
+        """'Visualize a given molecule string. Supports MIME and other structural identifier.
         Note: Triple bonds in SMILES strings represented by \'\#\' have to be URL-escaped as \'%23\' and \'?\' as \'%3F\'."""
         print('molec!')
 
@@ -150,3 +135,17 @@ class WolframCommands(commands.Cog):
             if pod.title == image_title:
                 message += str(pod.subpod.img.src) + "\n"
         await ctx.send(">> Wolfram: " + message)
+
+
+class AWSCommands(commands.Cog):
+    """Control Amazon ec2 server"""
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(name='todo', help='todo.')
+    async def todo(self, ctx: commands.Context, *, txt: str):
+        """todo."""
+        print("todo!")
+
+        await ctx.send(txt)

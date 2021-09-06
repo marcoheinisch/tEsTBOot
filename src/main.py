@@ -20,65 +20,132 @@ import boto3
 from mcstatus import MinecraftServer
 from src.commands import MainCommands, WolframCommands
 
+
+class ServerStat:
+    stopping = "stopping"
+    offline = "offline"
+    starting = "starting"
+    online = "online"
+    error = "error"
+    none = None
+
+
+class Conf:
+    ec2_instance_id = 'i-05ca5f05f965b3a4b'
+
+    channel_welcome = 752618408939487292
+    channel_status = 852114543759982592
+    massage_status = 883458320290152528
+
+    mc_server_aternos1 = "ratius99.aternos.me"
+    mc_server_amazon = "3.125.141.61"
+
+    time_delete_random = 60
+    time_check_mcserver = 10
+    time_check_mcserver_seconds = 20
+
+    activity_name_basic = " in der Cloud! ☁"
+
+    welcome_text = \
+        ["is needy and wait's for academic trash talk",
+         "is lonely and want's to talk",
+         "is waiting for you ",
+         "is sitting alone here",
+         "wants to procrastinate",
+         "is dying of boredom",
+         "has a quarterlife-crisis",
+         "is plotting to overthrow the government.",
+         "is hiding a bomb bellow his desk."
+         ]
+
+    colors = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000,
+              0x4682B4, 0x006400, 0x808080, 0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
+
+
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 AWS_SERVER_PUBLIC_KEY = os.getenv('AWS_SERVER_PUBLIC_KEY')
 AWS_SERVER_SECRET_KEY = os.getenv('AWS_SERVER_SECRET_KEY')
 
-MC_SERVER_CHECK_TIME = 10  # minutes
-MC_SERVER_ADDRESS = "ratius99.aternos.me"
-MC_SERVER_STATUS_INT = 0
-REACTION_MESSAGE_ID = 883458320290152528
-
-MESSAGE_CHANNEL = "📯mitteilungen"
-TXT_VOICE_UPDATE = ["is needy and wait's for academic trash talk",
-                    "is lonely and want's to talk",
-                    "is waiting for you ",
-                    "is sitting alone here",
-                    "wants to procrastinate",
-                    "is dying of boredom",
-                    "has a quarterlife-crisis",
-                    "is plotting to overthrow the government.",
-                    "is hiding a bomb bellow his desk."
-                    ]
-
-conf = {
-    "timeout_random": 60,
-    "aws_mc_checktime": 1,
-    "aws_mc_server_adress": "3.125.141.61",
-    "status_channel": 852114543759982592
-}
+session = boto3.Session(
+    aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
+    aws_secret_access_key=AWS_SERVER_SECRET_KEY,
+    region_name="eu-central-1"
+)
 
 intents = discord.Intents.default()
 intents.reactions = True
-basic_activity_name = " in der Cloud! ☁"
-bot = commands.Bot(command_prefix="!", activity=discord.Game(name=basic_activity_name), intents=intents)
+bot = commands.Bot(command_prefix="!", activity=discord.Game(name=Conf.activity_name_basic), intents=intents)
 
-controller_message = "Kontrolliere hier mit Reaktionen den tEsTOot:\n 1) Starte mit :white_check_mark: und stoppe mit :x: einen Amazon Minecraftserver (ip: 3.125.141.61).\n 2) mal sehn'..."
+
+def update_status_channel(known_awsstat=ServerStat.none):
+    channel = bot.get_channel(Conf.channel_status)
+
+    if known_awsstat:
+        player, serverstat = 0, known_awsstat
+    else:
+        player, serverstat = get_mc_status(Conf.mc_server_amazon)
+
+    controller_message = \
+        "-> Kontrolliere hier mit Reaktionen den tEsTOot:\n" \
+        " 1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver .\n" \
+        " 2) mal sehn'... \n" \
+        "-> Serverstatus: \n" \
+        f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}, 1 {player} \n" \
+        " - Aternos 17.1 (): siehe Bot-Status\n" \
+        " - Aternos 16.X (-): siehe #minecraft-log-1-16 "
+    msg = await channel.fetch_message(Conf.massage_status)
+    await msg.edit(content=controller_message)
+
+    name = f"↪🔄{serverstat}"
+    if serverstat == ServerStat.offline:
+        name = "↪❌offline"
+    if serverstat == ServerStat.online:
+        name = "↪✅online"
+    await channel.edit(name=name)
+
+    return serverstat
+
+
+def get_mc_status(ip: str) -> tuple[int, str]:
+    players = 0
+    serverstat = ServerStat.offline
+
+    try:
+        server = MinecraftServer.lookup(ip)
+        status = server.status()
+        players = int(status.players.online)
+    except Exception:
+        serverstat = ServerStat.error
+
+    return players, serverstat
 
 
 # Tasks
 
-@tasks.loop(minutes=MC_SERVER_CHECK_TIME)
+@tasks.loop(minutes=Conf.time_check_mcserver)
 async def check_mc_status():
     print("loopmc")
 
-    mc_status = basic_activity_name
-    players = 0
+    players, serverstat = get_mc_status(Conf.mc_server_aternos1)
 
-    try:
-        server = MinecraftServer.lookup(MC_SERVER_ADDRESS)
-        status = server.status()
-        players = status.players.online
-    except ConnectionRefusedError:
-        mc_status = " mit Errors ..."
-    except Exception:
-        mc_status = " mit \"bad status error\" :-("
-
-    if players:  # if no error happend:
-        mc_status = " mit " + ("einem Spieler" if (players == 1) else str(players) + " Spielern") + " MC!"
+    mc_status = Conf.activity_name_basic
+    if serverstat == ServerStat.error:
+        mc_status = " mit Error - _ -"
+    if serverstat == ServerStat.online:
+        mc_status = " mit " + ("einem Spieler" if (players == 1) else f"{players} Spielern") + " MC!"
 
     await bot.change_presence(activity=discord.Game(name=mc_status))
+
+
+@tasks.loop(seconds=Conf.time_check_mcserver_seconds)
+async def check_aws_mc_status():
+    print("loopawsmc")
+
+    serverstat = update_status_channel()
+
+    if serverstat != ServerStat.starting and serverstat != ServerStat.starting:
+        check_aws_mc_status.stop()
 
 
 # Events
@@ -96,21 +163,16 @@ async def on_voice_state_update(member, before, after):
             print(voice_channel.voice_states)
             if len(voice_channel.voice_states) == 1:
                 print("t2")
-                text_channel = discord.utils.get(guild.text_channels, name=MESSAGE_CHANNEL)
+                text_channel = discord.utils.get(guild.text_channels, id=Conf.channel_welcome)
                 await text_channel.send(f"Moin! {member.name} " + random.choice(
-                    TXT_VOICE_UPDATE) + ". Visit him at #" + after.channel.name + ".")
+                    Conf.welcome_text) + ". Visit him at #" + after.channel.name + ".")
 
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     check_mc_status.start()
-
-    channel = bot.get_channel(conf["status_channel"])
-    msg = await channel.fetch_message(REACTION_MESSAGE_ID)
-    await msg.edit(content=controller_message)
-    await msg.add_reaction('❌')
-    await msg.add_reaction('✅')
+    update_status_channel()
 
 
 @bot.event
@@ -137,38 +199,39 @@ async def on_command_error(ctx: commands.Context, error):
 
 @bot.event
 async def on_raw_reaction_add(payload):
-    if payload.message_id == REACTION_MESSAGE_ID:
+    if payload.message_id == Conf.massage_status:
         print(f"reaction {payload.emoji.name}")
 
-        session = boto3.Session(
-            aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
-            aws_secret_access_key=AWS_SERVER_SECRET_KEY,
-            region_name="eu-central-1"
-        )
         ec2 = session.resource('ec2')
-        instance = ec2.Instance('i-07baa970d1c82bb08')
-
-        channel = bot.get_channel(conf["status_channel"])
+        instance = ec2.Instance(Conf.ec2_instance_id)
 
         if payload.emoji.name == "✅":
             try:
                 instance.start()
-                await channel.edit(name=f"✅-aws-starting")
+                update_status_channel(known_awsstat=ServerStat.starting)
+                instance.wait_until_running()
+                check_aws_mc_status.start()
             except Exception as e:
                 print(e)
+                update_status_channel(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "❌":
             try:
                 instance.stop()
-                await channel.edit(name='❌-aws-stopping')
+                update_status_channel(known_awsstat=ServerStat.stopping)
+                instance.wait_until_stopped()
+                update_status_channel(known_awsstat=ServerStat.offline)
             except Exception as e:
                 print(e)
+                update_status_channel(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "⏪":
             pass
+            # ec2.modify_instance_attribute(InstanceId=Conf.ec2_instance_id, Attribute='instanceType', Value='t2.small')
 
         if payload.emoji.name == "⏩":
             pass
+
 
 bot.add_cog(MainCommands(bot))
 bot.add_cog(WolframCommands(bot))
