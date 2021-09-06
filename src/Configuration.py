@@ -1,5 +1,4 @@
 class Conf:
-    count_check_aws_mcserver = 35
     ec2_instance_id = 'i-07baa970d1c82bb08'
 
     channel_welcome = 752618408939487292
@@ -11,7 +10,8 @@ class Conf:
 
     time_delete_random = 60
     time_check_mcserver = 10
-    time_check_mcserver_seconds = 20
+    time_check_mcserver_seconds = 30
+    count_check_aws_mcserver = 10
 
     activity_name_basic = " in der Cloud! ☁"
 

@@ -62,7 +62,7 @@ async def update_status_channel(known_awsstat=ServerStat.none):
         " 2) mal sehn'... \n" \
         "-> Serverstatus: \n" \
         f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}, {player} Spieler \n" \
-        " - Aternos 17.1 (): siehe Bot-Status\n" \
+        " - Aternos 17.1 (-): siehe Bot-Status\n" \
         " - Aternos 16.X (-): siehe #minecraft-log-1-16 "
     msg = await channel.fetch_message(Conf.massage_status)
     await msg.edit(content=controller_message)
@@ -79,14 +79,15 @@ async def update_status_channel(known_awsstat=ServerStat.none):
 
 def get_mc_status(ip: str):
     players = 0
-
+    serverstat = ServerStat.offline
     try:
         server = MinecraftServer.lookup(ip)
         status = server.status()
         players = int(status.players.online)
-        serverstat = ServerStat.online
     except Exception:
         serverstat = ServerStat.offline
+    if players:
+        serverstat = ServerStat.online
 
     return players, serverstat
 
@@ -112,11 +113,11 @@ async def check_mc_status():
 async def check_aws_mc_status():
     print("loopawsmc")
 
-    p, serverstat = get_mc_status()
+    p, serverstat = get_mc_status(Conf.mc_server_amazon)
 
     if serverstat == ServerStat.online:
         check_aws_mc_status.stop()
-        update_status_channel()
+        await update_status_channel(ServerStat.online)
 
 
 # Events
