@@ -61,7 +61,7 @@ async def update_status_channel(known_awsstat=ServerStat.none):
         " 1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver .\n" \
         " 2) mal sehn'... \n" \
         "-> Serverstatus: \n" \
-        f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}, 1 {player} \n" \
+        f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}, {player} Spieler \n" \
         " - Aternos 17.1 (): siehe Bot-Status\n" \
         " - Aternos 16.X (-): siehe #minecraft-log-1-16 "
     msg = await channel.fetch_message(Conf.massage_status)
@@ -79,14 +79,14 @@ async def update_status_channel(known_awsstat=ServerStat.none):
 
 def get_mc_status(ip: str):
     players = 0
-    serverstat = ServerStat.offline
 
     try:
         server = MinecraftServer.lookup(ip)
         status = server.status()
         players = int(status.players.online)
+        serverstat = ServerStat.online
     except Exception:
-        serverstat = ServerStat.error
+        serverstat = ServerStat.offline
 
     return players, serverstat
 
@@ -108,14 +108,15 @@ async def check_mc_status():
     await bot.change_presence(activity=discord.Game(name=mc_status))
 
 
-@tasks.loop(seconds=Conf.time_check_mcserver_seconds)
+@tasks.loop(seconds=Conf.time_check_mcserver_seconds, count=Conf.count_check_aws_mcserver)
 async def check_aws_mc_status():
     print("loopawsmc")
 
-    serverstat = await update_status_channel()
+    p, serverstat = get_mc_status()
 
-    if serverstat != ServerStat.starting and serverstat != ServerStat.starting:
+    if serverstat == ServerStat.online:
         check_aws_mc_status.stop()
+        update_status_channel()
 
 
 # Events

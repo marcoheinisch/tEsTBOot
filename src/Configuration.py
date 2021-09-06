@@ -1,4 +1,5 @@
 class Conf:
+    count_check_aws_mcserver = 35
     ec2_instance_id = 'i-07baa970d1c82bb08'
 
     channel_welcome = 752618408939487292
