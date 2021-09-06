@@ -48,6 +48,16 @@ intents.reactions = True
 bot = commands.Bot(command_prefix="!", activity=discord.Game(name=Conf.activity_name_basic), intents=intents)
 
 
+async def update_status_channel_name(serverstat, players=0):
+    channel = bot.get_channel(Conf.channel_status)
+    name = f"↪🔄{serverstat}"
+    if serverstat == ServerStat.offline:
+        name = "↪❌offline"
+    if serverstat == ServerStat.online:
+        name = f"↪✅online-{players}-players"
+    await channel.edit(name=name)
+
+
 async def update_status_channel(known_awsstat=ServerStat.none):
     channel = bot.get_channel(Conf.channel_status)
 
@@ -61,19 +71,14 @@ async def update_status_channel(known_awsstat=ServerStat.none):
         " 1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver .\n" \
         " 2) mal sehn'... \n" \
         "-> Serverstatus: \n" \
-        f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}, {player} Spieler \n" \
+        f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}\n" \
         " - Aternos 17.1 (-): siehe Bot-Status\n" \
         " - Aternos 16.X (-): siehe #minecraft-log-1-16 "
     msg = await channel.fetch_message(Conf.massage_status)
-    await msg.edit(content=controller_message)
+    if msg.content != controller_message:
+        await msg.edit(content=controller_message)
 
-    name = f"↪🔄{serverstat}"
-    if serverstat == ServerStat.offline:
-        name = "↪❌offline"
-    if serverstat == ServerStat.online:
-        name = "↪✅online"
-    await channel.edit(name=name)
-
+    await update_status_channel_name(serverstat, player)
     return serverstat
 
 
@@ -95,6 +100,14 @@ def get_mc_status(ip: str):
 # Tasks
 
 @tasks.loop(minutes=Conf.time_check_mcserver)
+async def check_awsmc_status():
+    print("loopawsmc")
+
+    players, serverstat = get_mc_status(Conf.mc_server_aternos1)
+    await update_status_channel_name(serverstat, players)
+
+
+@tasks.loop(minutes=Conf.time_check_mcserver)
 async def check_mc_status():
     print("loopmc")
 
@@ -107,17 +120,6 @@ async def check_mc_status():
         mc_status = " mit " + ("einem Spieler" if (players == 1) else f"{players} Spielern") + " MC!"
 
     await bot.change_presence(activity=discord.Game(name=mc_status))
-
-
-@tasks.loop(seconds=Conf.time_check_mcserver_seconds, count=Conf.count_check_aws_mcserver)
-async def check_aws_mc_status():
-    print("loopawsmc")
-
-    p, serverstat = get_mc_status(Conf.mc_server_amazon)
-
-    if serverstat == ServerStat.online:
-        check_aws_mc_status.stop()
-        await update_status_channel(ServerStat.online)
 
 
 # Events
@@ -182,12 +184,15 @@ async def on_raw_reaction_add(payload):
                 instance.start()
                 await update_status_channel(known_awsstat=ServerStat.starting)
                 instance.wait_until_running()
-                check_aws_mc_status.start()
+                # check_aws_mc_status.start()
+                await update_status_channel(known_awsstat=ServerStat.online)
+                check_awsmc_status.start()
             except Exception as e:
                 print(e)
                 await update_status_channel(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "❌":
+            check_awsmc_status.stop()
             try:
                 instance.stop()
                 await update_status_channel(known_awsstat=ServerStat.stopping)
