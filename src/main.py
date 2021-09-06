@@ -77,7 +77,7 @@ async def update_status_channel(known_awsstat=ServerStat.none):
     return serverstat
 
 
-def get_mc_status(ip: str) -> tuple[int, str]:
+def get_mc_status(ip: str):
     players = 0
     serverstat = ServerStat.offline
 
