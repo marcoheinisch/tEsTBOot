@@ -91,7 +91,7 @@ def get_mc_status(ip: str):
         status = server.status()
         players = int(status.players.online)
     except Exception:
-        serverstat = ServerStat.offline
+        serverstat = ServerStat.error
     if players:
         serverstat = ServerStat.online
 
@@ -104,7 +104,7 @@ def get_mc_status(ip: str):
 async def check_awsmc_status():
     print("loopawsmc")
 
-    players, serverstat = get_mc_status(Conf.mc_server_aternos1)
+    players, serverstat = get_mc_status(Conf.mc_server_amazon)
     await update_status_channel_name(serverstat, players)
 
 
