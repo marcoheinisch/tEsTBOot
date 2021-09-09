@@ -186,7 +186,7 @@ async def on_raw_reaction_add(payload):
                 await update_status_channel(known_awsstat=ServerStat.starting)
                 instance.wait_until_running()
                 # check_aws_mc_status.start()
-                ipaddress = instance.get(u'PublicIpAddress')
+                ipaddress = instance.public_ip_address
                 await update_status_channel(known_awsstat=ServerStat.online, ip=ipaddress)
                 check_awsmc_status.start()
             except Exception as e:
