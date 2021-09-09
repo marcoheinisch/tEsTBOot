@@ -58,7 +58,7 @@ async def update_status_channel_name(serverstat, players=0):
     await channel.edit(name=name)
 
 
-async def update_status_channel(known_awsstat=ServerStat.none):
+async def update_status_channel(known_awsstat=ServerStat.none, ip="-"):
     channel = bot.get_channel(Conf.channel_status)
 
     if known_awsstat:
@@ -68,12 +68,13 @@ async def update_status_channel(known_awsstat=ServerStat.none):
 
     controller_message = \
         "-> Kontrolliere hier mit Reaktionen den tEsTOot:\n" \
-        " 1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver .\n" \
-        " 2) mal sehn'... \n" \
+        " 1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver. Beachte: IP ändert sich!\n" \
+        " 2) Mal sehn. Evtl gibts von Oracle kostenlose 24gb ram... \n\n" \
         "-> Serverstatus: \n" \
-        f" - Amazon 17.1 (ip: 3.125.141.61): {serverstat}\n" \
+        f" - Amazon 17.1 (ip: {ip} ): {serverstat}\n" \
         " - Aternos 17.1 (-): siehe Bot-Status\n" \
-        " - Aternos 16.X (-): siehe #minecraft-log-1-16 "
+        " - Aternos 16.X (-): siehe #minecraft-log-1-16 \n\n"\
+        f"{ip}"
     msg = await channel.fetch_message(Conf.massage_status)
     if msg.content != controller_message:
         await msg.edit(content=controller_message)
@@ -185,7 +186,8 @@ async def on_raw_reaction_add(payload):
                 await update_status_channel(known_awsstat=ServerStat.starting)
                 instance.wait_until_running()
                 # check_aws_mc_status.start()
-                await update_status_channel(known_awsstat=ServerStat.online)
+                ipaddress = instance.get(u'PublicIpAddress')
+                await update_status_channel(known_awsstat=ServerStat.online, ip=ipaddress)
                 check_awsmc_status.start()
             except Exception as e:
                 print(e)
