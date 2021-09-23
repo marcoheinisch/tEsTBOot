@@ -147,7 +147,6 @@ async def on_ready():
     else:
         await update_status_channel_message(known_awsstat=ServerStat.error)
 
-    await update_status_channel_message()
 
 
 @bot.event
