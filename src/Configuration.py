@@ -27,6 +27,17 @@ class Conf:
          "is hiding a bomb bellow his desk."
          ]
 
+    @staticmethod
+    def mcserver_controller_message(aws_ip, aws_text):
+        return "" \
+               "--> Kontrolliere hier mit Reaktionen den tEsTOot:\n" \
+               "   1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver. Beachte: IP ändert sich aktuell noch!\n" \
+               "   2) Mal sehn. Evtl gibts von Oracle kostenlose 24gb ram...(nein) \n\n" \
+               "--> Serverstatus: \n" \
+               f"   - Amazon 17.1 (minecraft.konziiis.de)*: {aws_text}\n" \
+               "   - Aternos 17.1 (ratius99.aternos.me): siehe Bot-Status\n" \
+               "   - Aternos 16.X (Konziiis.aternos.me): siehe <#781561552300933182>  \n\n" \
+               f"*Alternative IP: {aws_ip}"
+
     colors = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000,
               0x4682B4, 0x006400, 0x808080, 0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
-

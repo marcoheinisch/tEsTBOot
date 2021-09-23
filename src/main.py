@@ -25,7 +25,7 @@ from src.Configuration import Conf
 
 class ServerStat:
     stopping = "stopping"
-    offline = "offline"
+    stopped = "stopped"
     starting = "starting"
     online = "online"
     error = "error"
@@ -51,14 +51,14 @@ bot = commands.Bot(command_prefix="!", activity=discord.Game(name=Conf.activity_
 async def update_status_channel_name(serverstat, players=0):
     channel = bot.get_channel(Conf.channel_status)
     name = f"↪🔄{serverstat}"
-    if serverstat == ServerStat.offline:
-        name = "↪❌offline"
+    if serverstat == ServerStat.stopped:
+        name = "↪❌stopped"
     if serverstat == ServerStat.online:
         name = f"↪✅online-{players}-players"
     await channel.edit(name=name)
 
 
-async def update_status_channel(known_awsstat=ServerStat.none, ip="-"):
+async def update_status_channel_message(known_awsstat=ServerStat.none, ip="-"):
     channel = bot.get_channel(Conf.channel_status)
 
     if known_awsstat:
@@ -66,18 +66,10 @@ async def update_status_channel(known_awsstat=ServerStat.none, ip="-"):
     else:
         player, serverstat = get_mc_status(Conf.mc_server_amazon)
 
-    controller_message = \
-        "-> Kontrolliere hier mit Reaktionen den tEsTOot:\n" \
-        " 1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver. Beachte: IP ändert sich!\n" \
-        " 2) Mal sehn. Evtl gibts von Oracle kostenlose 24gb ram... \n\n" \
-        "-> Serverstatus: \n" \
-        f" - Amazon 17.1 (ip: {ip} ): {serverstat}\n" \
-        " - Aternos 17.1 (-): siehe Bot-Status\n" \
-        " - Aternos 16.X (-): siehe #minecraft-log-1-16 \n\n"\
-        f"{ip}"
+    message = Conf.mcserver_controller_message(ip, serverstat)
     msg = await channel.fetch_message(Conf.massage_status)
-    if msg.content != controller_message:
-        await msg.edit(content=controller_message)
+    if msg.content != message:
+        await msg.edit(content=message)
 
     await update_status_channel_name(serverstat, player)
     return serverstat
@@ -85,7 +77,7 @@ async def update_status_channel(known_awsstat=ServerStat.none, ip="-"):
 
 def get_mc_status(ip: str):
     players = 0
-    serverstat = ServerStat.offline
+    serverstat = ServerStat.stopped
     try:
         server = MinecraftServer.lookup(ip)
         status = server.status()
@@ -98,14 +90,14 @@ def get_mc_status(ip: str):
     return players, serverstat
 
 
-# Tasks
-
-@tasks.loop(minutes=Conf.time_check_mcserver)
-async def check_awsmc_status():
-    print("loopawsmc")
-
-    players, serverstat = get_mc_status(Conf.mc_server_amazon)
-    await update_status_channel_name(serverstat, players)
+# # Tasks
+#
+# @tasks.loop(minutes=Conf.time_check_mcserver)
+# async def check_awsmc_status():
+#     print("loopawsmc")
+#
+#     players, serverstat = get_mc_status(Conf.mc_server_amazon)
+#     await update_status_channel_name(serverstat, players)
 
 
 @tasks.loop(minutes=Conf.time_check_mcserver)
@@ -147,7 +139,15 @@ async def on_voice_state_update(member, before, after):
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     check_mc_status.start()
-    await update_status_channel()
+
+    ec2 = session.resource('ec2')
+    instance = ec2.Instance(Conf.ec2_instance_id)
+    if instance.state['Name'] == 'stopped':
+        await update_status_channel_message(known_awsstat=ServerStat.stopped)
+    else:
+        await update_status_channel_message(known_awsstat=ServerStat.error)
+
+    await update_status_channel_message()
 
 
 @bot.event
@@ -183,26 +183,24 @@ async def on_raw_reaction_add(payload):
         if payload.emoji.name == "✅":
             try:
                 instance.start()
-                await update_status_channel(known_awsstat=ServerStat.starting)
+                await update_status_channel_message(known_awsstat=ServerStat.starting)
                 instance.wait_until_running()
                 # check_aws_mc_status.start()
                 ipaddress = instance.public_ip_address
-                await update_status_channel(known_awsstat=ServerStat.online, ip=ipaddress)
-                check_awsmc_status.start()
+                await update_status_channel_message(known_awsstat=ServerStat.online, ip=ipaddress)
             except Exception as e:
                 print(e)
-                await update_status_channel(known_awsstat=ServerStat.error)
+                await update_status_channel_message(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "❌":
-            check_awsmc_status.stop()
             try:
                 instance.stop()
-                await update_status_channel(known_awsstat=ServerStat.stopping)
+                await update_status_channel_message(known_awsstat=ServerStat.stopping)
                 instance.wait_until_stopped()
-                await update_status_channel(known_awsstat=ServerStat.offline)
+                await update_status_channel_message(known_awsstat=ServerStat.stopped)
             except Exception as e:
                 print(e)
-                await update_status_channel(known_awsstat=ServerStat.error)
+                await update_status_channel_message(known_awsstat=ServerStat.error)
 
         if payload.emoji.name == "⏪":
             pass
