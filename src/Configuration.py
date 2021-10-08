@@ -24,15 +24,15 @@ class Conf:
          "is dying of boredom",
          "has a quarterlife-crisis",
          "is plotting to overthrow the government.",
-         "is hiding a bomb bellow his desk."
+         "is hiding a bomb below his desk."
          ]
 
     @staticmethod
     def mcserver_controller_message(aws_ip, aws_text):
         return "" \
                "--> Kontrolliere hier mit Reaktionen den tEsTOot:\n" \
-               "   1) Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver. Beachte: IP ändert sich aktuell noch!\n" \
-               "   2) Mal sehn. Evtl gibts von Oracle kostenlose 24gb ram...(nein) \n\n" \
+               "   - Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver.\n" \
+               "\n" \
                "--> Serverstatus: \n" \
                f"   - Amazon 17.1 (minecraft.konziiis.de)*: {aws_text}\n" \
                "   - Aternos 17.1 (ratius99.aternos.me): siehe Bot-Status\n" \

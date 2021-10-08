@@ -23,7 +23,7 @@ from src.commands import MainCommands, WolframCommands
 from src.Configuration import Conf
 
 
-class ServerStat:
+class ServerStatus:
     stopping = "stopping"
     stopped = "stopped"
     starting = "starting"
@@ -48,88 +48,85 @@ intents.reactions = True
 bot = commands.Bot(command_prefix="!", activity=discord.Game(name=Conf.activity_name_basic), intents=intents)
 
 
-async def update_status_channel_name(serverstat, players=0):
+# Helper Methods
+
+async def update_status_channel_name(status):
+    """Update bot channel which displays minecraft server stats."""
     channel = bot.get_channel(Conf.channel_status)
-    name = f"↪🔄{serverstat}"
-    if serverstat == ServerStat.stopped:
+    name = f"↪🔄{status}"
+
+    if status == ServerStatus.stopped:
         name = "↪❌stopped"
-    if serverstat == ServerStat.online:
-        name = f"↪✅online-{players}-players"
+
+    if status == ServerStatus.online:
+        name = f"↪✅online"
+
     await channel.edit(name=name)
 
 
-async def update_status_channel_message(known_awsstat=ServerStat.none, ip="-"):
+async def update_status_channel_message(status=ServerStatus.none, ip="-"):
+    """Update bot message which controls and displays minecraft server stats."""
     channel = bot.get_channel(Conf.channel_status)
-
-    if known_awsstat:
-        player, serverstat = 0, known_awsstat
-    else:
-        player, serverstat = get_mc_status(Conf.mc_server_amazon)
-
-    message = Conf.mcserver_controller_message(ip, serverstat)
     msg = await channel.fetch_message(Conf.massage_status)
+
+    message = Conf.mcserver_controller_message(aws_ip=ip, aws_text=status)
     if msg.content != message:
         await msg.edit(content=message)
 
-    await update_status_channel_name(serverstat, player)
-    return serverstat
+    await update_status_channel_name(status)
 
 
 def get_mc_status(ip: str):
     players = 0
-    serverstat = ServerStat.stopped
+    status = ServerStatus.stopped
     try:
         server = MinecraftServer.lookup(ip)
-        status = server.status()
-        players = int(status.players.online)
+        mc_status = server.status()
+        players = int(mc_status.players.online)
     except Exception:
-        serverstat = ServerStat.error
+        status = ServerStatus.error
+
     if players:
-        serverstat = ServerStat.online
+        status = ServerStatus.online
 
-    return players, serverstat
+    return players, status
 
 
-# # Tasks
-#
-# @tasks.loop(minutes=Conf.time_check_mcserver)
-# async def check_awsmc_status():
-#     print("loopawsmc")
-#
-#     players, serverstat = get_mc_status(Conf.mc_server_amazon)
-#     await update_status_channel_name(serverstat, players)
-
+# Tasks
 
 @tasks.loop(minutes=Conf.time_check_mcserver)
 async def check_mc_status():
     print("loopmc")
 
-    players, serverstat = get_mc_status(Conf.mc_server_aternos1)
+    players, status = get_mc_status(Conf.mc_server_aternos1)
+    bot_activity_name = Conf.activity_name_basic
 
-    mc_status = Conf.activity_name_basic
-    if serverstat == ServerStat.error:
-        mc_status = " mit Error - _ -"
-    if serverstat == ServerStat.online:
-        mc_status = " mit " + ("einem Spieler" if (players == 1) else f"{players} Spielern") + " MC!"
+    if status == ServerStatus.error:
+        bot_activity_name = " mit Error - _ -"
 
-    await bot.change_presence(activity=discord.Game(name=mc_status))
+    if status == ServerStatus.online:
+        bot_activity_name = " mit " + ("einem Spieler" if (players == 1) else f"{players} Spielern") + " MC!"
+
+    await bot.change_presence(activity=discord.Game(name=bot_activity_name))
 
 
 # Events
 
 @bot.event
 async def on_voice_state_update(member, before, after):
+    """If user is sitting alone in a voice channel for some time, send a massage in #mitteilungen."""
+
     if before.channel is None and after.channel is not None:
         channel_name = after.channel.name
-        print("lonely state")
         await asyncio.sleep(10)  # wait to est if user is shy / has misclicked
+
         if after.channel is not None:
-            print("trigger")
             guild = discord.utils.get(bot.guilds, name=GUILD)
             voice_channel = discord.utils.get(guild.voice_channels, name=channel_name)
             print(voice_channel.voice_states)
+
             if len(voice_channel.voice_states) == 1:
-                print("t2")
+                print("lonely state")
                 text_channel = discord.utils.get(guild.text_channels, id=Conf.channel_welcome)
                 await text_channel.send(f"Moin! {member.name} " + random.choice(
                     Conf.welcome_text) + ". Visit him at #" + after.channel.name + ".")
@@ -142,11 +139,11 @@ async def on_ready():
 
     ec2 = session.resource('ec2')
     instance = ec2.Instance(Conf.ec2_instance_id)
-    if instance.state['Name'] == 'stopped':
-        await update_status_channel_message(known_awsstat=ServerStat.stopped)
-    else:
-        await update_status_channel_message(known_awsstat=ServerStat.error)
 
+    if instance.state['Name'] == 'stopped':
+        await update_status_channel_message(status=ServerStatus.stopped)
+    else:
+        await update_status_channel_message(status=ServerStatus.error)
 
 
 @bot.event
@@ -161,7 +158,9 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author == bot.user:
         return
+
     # here read messages
+
     await bot.process_commands(message)
 
 
@@ -173,6 +172,8 @@ async def on_command_error(ctx: commands.Context, error):
 
 @bot.event
 async def on_raw_reaction_add(payload):
+    """Control stuff with reactions"""
+
     if payload.message_id == Conf.massage_status:
         print(f"reaction {payload.emoji.name}")
 
@@ -182,24 +183,24 @@ async def on_raw_reaction_add(payload):
         if payload.emoji.name == "✅":
             try:
                 instance.start()
-                await update_status_channel_message(known_awsstat=ServerStat.starting)
+                await update_status_channel_message(status=ServerStatus.starting)
                 instance.wait_until_running()
                 # check_aws_mc_status.start()
                 ipaddress = instance.public_ip_address
-                await update_status_channel_message(known_awsstat=ServerStat.online, ip=ipaddress)
+                await update_status_channel_message(status=ServerStatus.online, ip=ipaddress)
             except Exception as e:
                 print(e)
-                await update_status_channel_message(known_awsstat=ServerStat.error)
+                await update_status_channel_message(status=ServerStatus.error)
 
         if payload.emoji.name == "❌":
             try:
                 instance.stop()
-                await update_status_channel_message(known_awsstat=ServerStat.stopping)
+                await update_status_channel_message(status=ServerStatus.stopping)
                 instance.wait_until_stopped()
-                await update_status_channel_message(known_awsstat=ServerStat.stopped)
+                await update_status_channel_message(status=ServerStatus.stopped)
             except Exception as e:
                 print(e)
-                await update_status_channel_message(known_awsstat=ServerStat.error)
+                await update_status_channel_message(status=ServerStatus.error)
 
         if payload.emoji.name == "⏪":
             pass
