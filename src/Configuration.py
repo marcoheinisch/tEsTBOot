@@ -11,6 +11,7 @@ class Conf:
     time_delete_random = 60
     time_check_mcserver = 10
     time_check_mcserver_seconds = 30
+    time_do_tasks = 30
     count_check_aws_mcserver = 10
 
     activity_name_basic = " in der Cloud! ☁"

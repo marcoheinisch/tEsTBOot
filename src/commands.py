@@ -63,6 +63,7 @@ class MainCommands(commands.Cog):
         response = requests.get(image_url)
         img = response.content
         img = await ctx.guild.create_custom_emoji(name=emoji_name, image=img)
+
         await ctx.send(">> Emoji created: " + str(img))
 
     @commands.command(name='molec')
@@ -72,6 +73,7 @@ class MainCommands(commands.Cog):
         print('molec!')
 
         url1 = 'http://cactus.nci.nih.gov/chemical/structure/' + smile_string + '/image'
+
         await ctx.send(">> Molecule: " + str(url1))
 
 
@@ -96,6 +98,7 @@ class WolframCommands(commands.Cog):
             message = next(res.results).text
         except StopIteration:
             message = "No short result found. Try \"!wolfram-l\"."
+
         await ctx.send(">> Wolfram: " + message)
 
     @commands.command(name='wolfall')
@@ -115,6 +118,7 @@ class WolframCommands(commands.Cog):
             for sub in pod.subpods:
                 if sub.plaintext:
                     message += str(sub.plaintext) + "\n"
+
         await ctx.send(">> Wolfram: " + message)
 
     @commands.command(name='wolfget')
@@ -135,6 +139,7 @@ class WolframCommands(commands.Cog):
         for pod in res.pods:
             if pod.title == image_title:
                 message += str(pod.subpod.img.src) + "\n"
+
         await ctx.send(">> Wolfram: " + message)
 
 

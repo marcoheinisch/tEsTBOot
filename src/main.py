@@ -21,6 +21,7 @@ from mcstatus import MinecraftServer
 
 from src.commands import MainCommands, WolframCommands
 from src.Configuration import Conf
+from src.tasks import do_request_and_save
 
 
 class ServerStatus:
@@ -93,6 +94,10 @@ def get_mc_status(ip: str):
 
 
 # Tasks
+
+@tasks.loop(minutes=Conf.time_do_tasks)
+async def do_tasks():
+    do_request_and_save()
 
 @tasks.loop(minutes=Conf.time_check_mcserver)
 async def check_mc_status():

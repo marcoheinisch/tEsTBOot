@@ -5,3 +5,5 @@ mcstatus
 wolframalpha
 nested-lookup
 boto3
+bs4
+firebase
