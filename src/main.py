@@ -143,6 +143,7 @@ async def on_voice_state_update(member, before, after):
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     check_mc_status.start()
+    do_tasks.start()
 
     ec2 = session.resource('ec2')
     instance = ec2.Instance(Conf.ec2_instance_id)

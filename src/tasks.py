@@ -20,7 +20,7 @@ def __get_wof_soup() -> BeautifulSoup:
 
 def __get_wof_value(wof_soup):
     """Get gym utilization data"""
-
+    
     data = []
     table = wof_soup.find('table')
     table_body = table.find('tbody')
