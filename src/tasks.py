@@ -40,11 +40,13 @@ def __get_wof_value(wof_soup):
 
 def do_request_and_save():
     data_wof1 = -1
-    try:
-        soup = __get_wof_soup()
-        data_wof1 = __get_wof_value(soup)
-    except Exception:
-        print("Error: get_wof failed!")
+    soup = __get_wof_soup()
+    data_wof1 = __get_wof_value(soup)
+    #try:
+    #    soup = __get_wof_soup()
+    #    data_wof1 = __get_wof_value(soup)
+    #except Exception:
+    #    print("Error: get_wof failed!")
         
     now = datetime.datetime.today()
     date_str = str(now.date())
