@@ -6,4 +6,11 @@ wolframalpha
 nested-lookup
 boto3
 bs4
+
+python_jwt
+gcloud
+sseclient
+pycryptodome==3.4.3
+requests_toolbelt
+firebase~=3.0.1
 firebase
