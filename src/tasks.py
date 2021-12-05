@@ -12,7 +12,7 @@ WOF_URL = os.getenv('WOF_URL')
 def __get_wof_soup() -> BeautifulSoup:
     """Request Website with gym utilization data"""
 
-    url = ()
+    url = (WOF_URL)
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
 
