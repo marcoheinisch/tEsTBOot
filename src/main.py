@@ -48,6 +48,7 @@ intents = discord.Intents.default()
 intents.reactions = True
 bot = commands.Bot(command_prefix="!", activity=discord.Game(name=Conf.activity_name_basic), intents=intents)
 
+do_request_and_save()
 
 # Helper Methods
 
@@ -97,6 +98,7 @@ def get_mc_status(ip: str):
 
 @tasks.loop(minutes=Conf.time_do_tasks)
 async def do_tasks():
+    print("loopwof")
     do_request_and_save()
 
 @tasks.loop(minutes=Conf.time_check_mcserver)
