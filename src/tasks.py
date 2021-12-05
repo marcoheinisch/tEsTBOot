@@ -48,7 +48,7 @@ def do_request_and_save():
     #except Exception:
     #    print("Error: get_wof failed!")
         
-    now = datetime.datetime.today()
+    now = datetime.datetime.today()+datetime.timedelta(hours=1)
     date_str = str(now.date())
     time_str = str(now.time())[:8]
 
