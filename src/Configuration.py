@@ -35,7 +35,7 @@ class Conf:
                "   - Starte (:white_check_mark:) und stoppe (:x:) den Amazon Minecraftserver.\n" \
                "\n" \
                "--> Serverstatus: \n" \
-               f"   - Amazon 17.1 (minecraft.konziiis.de)*: {aws_text}\n" \
+               f"   - Amazon 18.1 (minecraft.konziiis.de)*: {aws_text}\n" \
                "   - Aternos 17.1 (ratius99.aternos.me): siehe Bot-Status\n" \
                "   - Aternos 16.X (Konziiis.aternos.me): siehe <#781561552300933182>  \n\n" \
                f"*Alternative IP: {aws_ip}"
