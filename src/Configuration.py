@@ -18,14 +18,15 @@ class Conf:
 
     welcome_text = \
         ["is needy and wait's for academic trash talk",
+         "iws needy awnd wait's fow academic twash tawk",
          "is lonely and want's to talk",
-         "is waiting for you ",
+         "is waiting for you",
          "is sitting alone here",
          "wants to procrastinate",
          "is dying of boredom",
          "has a quarterlife-crisis",
-         "is plotting to overthrow the government.",
-         "is hiding a bomb below his desk."
+         "is plotting to overthrow the government",
+         "is hiding a bomb below their desk"
          ]
 
     @staticmethod
