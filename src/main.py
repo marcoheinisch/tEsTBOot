@@ -135,8 +135,9 @@ async def on_voice_state_update(member, before, after):
             if len(voice_channel.voice_states) == 1:
                 print("lonely state")
                 text_channel = discord.utils.get(guild.text_channels, id=Conf.channel_welcome)
-                await text_channel.send(f"Moin! {member.name} " + random.choice(
-                    Conf.welcome_text) + ". Visit him at #" + after.channel.name + ".")
+                await text_channel.send(f"Moin! {member.name} {random.choice(Conf.welcome_text)}. " + 
+                                        f"Visit him at #{after.channel.name}." + "\n" + 
+                                        f"{random.choice(Conf.quotes)}")
 
 
 @bot.event
