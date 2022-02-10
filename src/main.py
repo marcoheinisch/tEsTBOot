@@ -222,6 +222,7 @@ async def on_raw_reaction_add(payload):
 
 bot.add_cog(MainCommands(bot))
 bot.add_cog(WolframCommands(bot))
+bot.add_cog(QuotesCommands(bot))
 
 bot.run(TOKEN)
 
