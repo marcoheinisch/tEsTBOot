@@ -165,7 +165,7 @@ class QuotesCommands(commands.Cog):
     def get_random_quote(self) -> str:
         quotes = random.choice([Conf.quotes, Conf.quotes_better])
         quote = random.choice(quotes)
-        return f">{['text']}\n>   ~{quote['author']}"
+        return f">{quote['text']}\n>   ~{quote['author']}"
 
     @commands.command(name='quote', help='todo.')
     async def quote(self, ctx: commands.Context):
@@ -192,4 +192,4 @@ class QuotesCommands(commands.Cog):
         else:
             quote = random.choice(found_quotes)
             
-        await ctx.send(quote)
+        await ctx.send(f">{quote['text']}\n>   ~{quote['author']}")
