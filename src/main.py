@@ -8,6 +8,7 @@
 # Wolfram-API:
 #   https://products.wolframalpha.com/api/documentation/#getting-started
 
+import json
 import os
 import random
 import asyncio
@@ -19,7 +20,7 @@ from discord.ext import tasks
 import boto3
 from mcstatus import MinecraftServer
 
-from src.commands import MainCommands, WolframCommands
+from src.commands import MainCommands, WolframCommands, QuotesCommands
 from src.Configuration import Conf
 from src.tasks import do_request_and_save
 
@@ -137,7 +138,7 @@ async def on_voice_state_update(member, before, after):
                 text_channel = discord.utils.get(guild.text_channels, id=Conf.channel_welcome)
                 await text_channel.send(f"Moin! {member.name} {random.choice(Conf.welcome_text)}. " + 
                                         f"Visit him at #{after.channel.name}." + "\n" + 
-                                        f"{random.choice(Conf.quotes)}")
+                                        f"{QuotesCommands.get_random_quote()}")
 
 
 @bot.event

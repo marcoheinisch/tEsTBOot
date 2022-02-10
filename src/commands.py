@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import requests
@@ -142,7 +143,6 @@ class WolframCommands(commands.Cog):
 
         await ctx.send(">> Wolfram: " + message)
 
-
 class AWSCommands(commands.Cog):
     """Control Amazon ec2 server"""
 
@@ -155,3 +155,38 @@ class AWSCommands(commands.Cog):
         print("todo!")
 
         await ctx.send(txt)
+        
+class QuotesCommands(commands.Cog):
+    """ Quotes. """
+
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        
+    def get_random_quote() -> str:
+        def get_random_quote_obj():
+            file_path = random.choice(Conf.quote_files)
+            quotes = json.load(open(file_path))
+            return random.choice(quotes)
+
+        quote = get_random_quote_obj()
+        return f">{quote.text}\n>   ~{quote.author}"
+
+    @commands.command(name='findquote', help='todo.')
+    async def findquote(self, ctx: commands.Context, *, search_phrase: str, printall: bool = False):
+        """find a quote in quote colection"""
+        print("findquote!")
+        found_quotes = []
+        
+        for file_path in Conf.quote_files:
+            for quote in json.load(open(file_path)):
+                if search_phrase in quote:
+                    found_quotes.append(quote)
+                    
+        if found_quotes == []:
+            quote = "Find nothing ..."
+        elif printall:
+            quote = "\n".join([f"\"{q.text}\" ~ {q.author};  " for q in found_quotes])
+        else:
+            quote = random.choice(found_quotes)
+            
+        await ctx.send(quote)
