@@ -14,5 +14,3 @@ pycryptodome==3.4.3
 requests_toolbelt
 firebase~=3.0.1
 firebase
-
-json
