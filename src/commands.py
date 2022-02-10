@@ -162,12 +162,18 @@ class QuotesCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         
-    def get_random_quote() -> str:
+    def get_random_quote(self) -> str:
         quotes = random.choice([Conf.quotes, Conf.quotes_better])
-
         quote = random.choice(quotes)
         return f">{quote.text}\n>   ~{quote.author}"
 
+    @commands.command(name='quote', help='todo.')
+    async def quote(self, ctx: commands.Context):
+        """find a quote in quote colection"""
+        print("quote!")
+        
+        await ctx.send(self.get_random_quote())
+        
     @commands.command(name='findquote', help='todo.')
     async def findquote(self, ctx: commands.Context, *, search_phrase: str, printall: bool = False):
         """find a quote in quote colection"""
@@ -176,7 +182,7 @@ class QuotesCommands(commands.Cog):
         
         for quotes in [Conf.quotes,Conf.quotes_better]:
             for quote in quotes:
-                if search_phrase in quote:
+                if search_phrase in quote.text or search_phrase in quote.author:
                     found_quotes.append(quote)
                     
         if found_quotes == []:
