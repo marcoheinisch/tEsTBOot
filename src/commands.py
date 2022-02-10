@@ -163,12 +163,9 @@ class QuotesCommands(commands.Cog):
         self.bot = bot
         
     def get_random_quote() -> str:
-        def get_random_quote_obj():
-            file_path = random.choice(Conf.quote_files)
-            quotes = json.load(open(file_path))
-            return random.choice(quotes)
+        quotes = random.choice([Conf.quotes, Conf.quotes_better])
 
-        quote = get_random_quote_obj()
+        quote = random.choice(quotes)
         return f">{quote.text}\n>   ~{quote.author}"
 
     @commands.command(name='findquote', help='todo.')
@@ -177,8 +174,8 @@ class QuotesCommands(commands.Cog):
         print("findquote!")
         found_quotes = []
         
-        for file_path in Conf.quote_files:
-            for quote in json.load(open(file_path)):
+        for quotes in [Conf.quotes,Conf.quotes_better]:
+            for quote in quotes:
                 if search_phrase in quote:
                     found_quotes.append(quote)
                     
