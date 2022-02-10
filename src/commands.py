@@ -161,8 +161,10 @@ class QuotesCommands(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        
-    def get_random_quote(self) -> str:
+    
+    @staticmethod
+    def get_random_quote() -> str:
+        from src.Configuration import Conf
         quotes = random.choice([Conf.quotes, Conf.quotes_better])
         quote = random.choice(quotes)
         return f"> {quote['text']}\n>   ~{quote['author']}"
